@@ -12,7 +12,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -105,7 +104,9 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                 }
                 else //Empty bucket code
                 {
-
+                    Material material = world.getBlock(i, j, k).getMaterial();
+                    if(material.isLiquid() || !material.isSolid())
+                        return itemstack;
                     //Offset position based on side hit
                     if (movingobjectposition.sideHit == 0)
                     {
@@ -216,39 +217,32 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
      */
     public ItemStack placeFluid(EntityPlayer player, ItemStack itemstack, World world, int x, int y, int z)
     {
-        Material material = world.getBlock(x, y, z).getMaterial();
-        if (!isEmpty(itemstack) && world.isAirBlock(x, y, z) && material.isSolid())
+        if (isFull(itemstack) && world.isAirBlock(x, y, z))
         {
             FluidStack stack = getFluid(itemstack);
             if (stack != null && stack.getFluid() != null && stack.getFluid().canBePlacedInWorld() && stack.getFluid().getBlock() != null)
             {
-                if (stack.amount == FluidContainerRegistry.BUCKET_VOLUME)
+                //TODO add support for oil and other fuel types to explode in the nether
+                if (world.provider.isHellWorld && stack.getFluid().getUnlocalizedName().contains("water"))
                 {
-                    if (world.provider.isHellWorld && stack.getFluid().getBlock() == Blocks.flowing_water)
-                    {
-                        //TODO unit test to ensure functionality
-                        world.playSoundEffect((double) ((float) x + 0.5F), (double) ((float) y + 0.5F), (double) ((float) z + 0.5F), "random.fizz", 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
+                    world.playSoundEffect((double) ((float) x + 0.5F), (double) ((float) y + 0.5F), (double) ((float) z + 0.5F), "random.fizz", 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
 
-                        for (int l = 0; l < 8; ++l)
-                        {
-                            world.spawnParticle("largesmoke", (double) x + Math.random(), (double) y + Math.random(), (double) z + Math.random(), 0.0D, 0.0D, 0.0D);
-                        }
-                        //TODO unit test to ensure functionality
-                        return consumeBucket(itemstack, player, new ItemStack(this));
-                    }
-                    else
+                    for (int l = 0; l < 8; ++l)
                     {
-                        //TODO unit test to ensure functionality
-                        if (!world.isRemote && !material.isLiquid())
-                        {
-                            world.func_147480_a(x, y, z, true);
-                        }
-
-                        if (world.setBlock(x, y, z, stack.getFluid().getBlock(), 0, 3))
-                            return consumeBucket(itemstack, player, new ItemStack(this));
+                        world.spawnParticle("largesmoke", (double) x + Math.random(), (double) y + Math.random(), (double) z + Math.random(), 0.0D, 0.0D, 0.0D);
                     }
+                    return consumeBucket(itemstack, player, new ItemStack(this));
                 }
-                //TODO add support for blocks that can be filled without the bucket being full, IFluidBlock
+                else
+                {
+                    if (!world.isRemote)
+                    {
+                        world.func_147480_a(x, y, z, true);
+                    }
+
+                    world.setBlock(x, y, z, stack.getFluid().getBlock(), 0, 3);
+                    return consumeBucket(itemstack, player, new ItemStack(this));
+                }
             }
         }
         return itemstack;
@@ -461,7 +455,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     }
 
     @Override
-    public void onUpdate(ItemStack stack, World world, Entity entity, int p_77663_4_, boolean p_77663_5_)
+    public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean held)
     {
         FluidStack fluid = getFluid(stack);
         if (WoodenBucket.PREVENT_HOT_FLUID_USAGE && fluid != null && fluid.getFluid() != null && fluid.getFluid().getTemperature(fluid) > 400)
