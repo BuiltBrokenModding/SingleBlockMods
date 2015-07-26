@@ -14,8 +14,8 @@ import java.io.File;
 /**
  * Created by Dark on 7/25/2015.
  */
-@Mod(modid = WoodenRails.DOMAIN, name = "Colored Chests", version = "@MAJOR@.@MINOR@.@REVIS@.@BUILD@")
-public class WoodenRails
+@Mod(modid = ColoredChests.DOMAIN, name = "Colored Chests", version = "@MAJOR@.@MINOR@.@REVIS@.@BUILD@")
+public class ColoredChests
 {
     public static final String DOMAIN = "coloredchests";
     public static final String PREFIX = DOMAIN + ":";
@@ -31,6 +31,8 @@ public class WoodenRails
         LOGGER = LogManager.getLogger("ColoredChests");
         Configuration config = new Configuration(new File(event.getModConfigurationDirectory(), "bbm/Colored_Chests.cfg"));
         config.load();
+
+
         config.save();
         proxy.preInit();
     }

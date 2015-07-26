@@ -42,11 +42,11 @@ buildProps.withReader {
 }
 
 if (project.getProperty("bambooshortPlanName") == "BBM-Dev") {
-    group = "dev.builtbroken.coloredchests"
-    archivesBaseName = "ColoredChests"
+    group = "dev.builtbroken.cardboardboxes"
+    archivesBaseName = "CardboardBoxes"
 } else {
-    group = "com.builtbroken.coloredchests"
-    archivesBaseName = "ColoredChests"
+    group = "com.builtbroken.cardboardboxes"
+    archivesBaseName = "CardboardBoxes"
 }
 
 println archivesBaseName 
@@ -127,4 +127,4 @@ jacocoTestReport {
     }
 }
 
-file("Colored-Chests.txt").text = version;
+file("Cardboard-Boxes.txt").text = version;
