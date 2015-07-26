@@ -26,6 +26,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.fluids.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -40,10 +41,12 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     public static IIcon lavaTexture;
 
     @SideOnly(Side.CLIENT)
-    public static IIcon milkTexture;
-
-    @SideOnly(Side.CLIENT)
     public static IIcon blankTexture;
+
+    public static HashMap<String, IIcon> fluidToIconMap = new HashMap();
+
+    //TODO rename to fluid.molten
+    public static String[] supportedFluidTextures = new String[]{"milk", "blood","slime.blue", "fuel", "molten_aluminum", "glue", "molten_alubrass", "molten_alumite", "molten_angmallen", "molten_ardite", "molten_bronze", "molten_cobalt", "molten_copper", "molten_electrum", "molten_emerald", "molten_ender", "molten_enderium", "molten_glass", "molten_gold", "molten_invar", "molten_iron", "molten_lead", "molten_lumium", "molten_manyulln", "molten_mithril", "molten_nickel", "molten_obsidian", "molten_pigiron", "molten_shiny", "molten_signalum", "molten_silver", "molten_steel", "molten_tin", "oil", "redplasma"};
 
     public ItemWoodenBucket()
     {
@@ -177,9 +180,8 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     public ItemStack pickupFluid(EntityPlayer player, ItemStack itemstack, World world, int i, int j, int k)
     {
         Block block = world.getBlock(i, j, k);
-        Material material = block.getMaterial();
         int l = world.getBlockMetadata(i, j, k);
-        
+
         if (block == Blocks.water && l == 0)
         {
             if (world.setBlockToAir(i, j, k))
@@ -417,8 +419,12 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         this.itemIcon = reg.registerIcon(WoodenBucket.PREFIX + "bucket");
         this.fluidTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.fluid");
         this.lavaTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.lava");
-        this.milkTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.milk");
         this.blankTexture = reg.registerIcon(WoodenBucket.PREFIX + "blank");
+
+        for(String string : supportedFluidTextures)
+        {
+            fluidToIconMap.put("string", reg.registerIcon(WoodenBucket.PREFIX + "bucket." + string));
+        }
     }
 
     @SideOnly(Side.CLIENT)
@@ -429,10 +435,10 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         {
             if (isEmpty(stack))
                 return blankTexture;
-            else if (getFluid(stack).getFluid() == FluidRegistry.LAVA)
+            else if (getFluid(stack).getFluid() == FluidRegistry.LAVA || getFluid(stack).getFluid().getTemperature() > 600)
                 return lavaTexture;
-            else if (getFluid(stack).getUnlocalizedName().contains("milk"))
-                return milkTexture;
+            else if (fluidToIconMap.containsKey(getFluid(stack).getFluid().getName()))
+                return fluidToIconMap.get(getFluid(stack).getFluid().getName());
             else
                 return fluidTexture;
         }

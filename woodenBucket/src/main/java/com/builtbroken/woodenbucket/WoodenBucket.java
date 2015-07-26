@@ -87,6 +87,7 @@ public class WoodenBucket
 
         //TODO add crafting recipes for milk bucket
         GameRegistry.addShapedRecipe(new ItemStack(itemBucket), " s ", "wcw", " w ", 'w', Blocks.planks, 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
+
     }
 
     @SideOnly(Side.CLIENT)
