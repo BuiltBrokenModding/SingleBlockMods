@@ -4,6 +4,7 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +40,9 @@ public class WoodenBucket
         DAMAGE_BUCKET_WITH_HOT_FLUID = config.getBoolean("DamageBucketWithHotFluid", "WoodenBucketUsage", DAMAGE_BUCKET_WITH_HOT_FLUID, "Will randomly destroy the bucket if it contains hot fluid, lava in other words");
         BURN_PLAYER_WITH_HOT_FLUID = config.getBoolean("BurnPlayerWithHotFluid", "WoodenBucketUsage", BURN_PLAYER_WITH_HOT_FLUID, "Will light the player on fire if the bucket contains a hot fluid, lava in other words");
         config.save();
+
+        itemBucket = new ItemWoodenBucket();
+        GameRegistry.registerItem(itemBucket, "wbBucket", DOMAIN);
     }
 
     @Mod.EventHandler

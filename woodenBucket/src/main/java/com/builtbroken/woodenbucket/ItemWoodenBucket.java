@@ -1,30 +1,58 @@
 package com.builtbroken.woodenbucket;
 
 import cpw.mods.fml.common.eventhandler.Event;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.fluids.*;
+
+import java.util.List;
 
 /**
  * Created by Dark on 7/25/2015.
  */
 public class ItemWoodenBucket extends Item implements IFluidContainerItem
 {
+    @SideOnly(Side.CLIENT)
+    public static IIcon fluidTexture;
+
+    @SideOnly(Side.CLIENT)
+    public static IIcon blankTexture;
+
     public ItemWoodenBucket()
     {
         this.maxStackSize = 1;
+        this.setUnlocalizedName(WoodenBucket.PREFIX + "WoodenBucket");
         this.setCreativeTab(CreativeTabs.tabMisc);
+        this.setHasSubtypes(true);
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean b)
+    {
+        if (!isEmpty(stack))
+        {
+            list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.name") + ": " + getFluid(stack).getLocalizedName());
+            list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.amount.name") + ": " + getFluid(stack).amount +"mb");
+        }
     }
 
     @Override
@@ -375,5 +403,85 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     public int getItemStackLimit(ItemStack stack)
     {
         return isEmpty(stack) ? Items.bucket.getItemStackLimit() : 1;
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void registerIcons(IIconRegister reg)
+    {
+        this.itemIcon = reg.registerIcon(WoodenBucket.PREFIX + "bucket");
+        this.fluidTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.fluid");
+        this.blankTexture = reg.registerIcon(WoodenBucket.PREFIX + "blank");
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public IIcon getIcon(ItemStack stack, int pass)
+    {
+        if (pass == 1)
+        {
+            if (isEmpty(stack))
+                return blankTexture;
+            else
+                return fluidTexture;
+        }
+        return super.getIcon(stack, pass);
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public boolean requiresMultipleRenderPasses()
+    {
+        return true;
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public int getColorFromItemStack(ItemStack stack, int pass)
+    {
+        if (!isEmpty(stack) && pass == 1)
+            return getFluid(stack).getFluid().getColor();
+        return 16777215;
+    }
+
+    @Override
+    public void onUpdate(ItemStack stack, World world, Entity entity, int p_77663_4_, boolean p_77663_5_)
+    {
+        //TODO damage bucket if has molten fluid
+        //TODO burn entity if has molten fluid
+    }
+
+    @Override
+    public boolean onEntityItemUpdate(EntityItem entityItem)
+    {
+        //TODO damage bucket if has molten fluid
+        //TODO chance to catch area on fire around it
+        return false;
+    }
+
+    @Override
+    public boolean itemInteractionForEntity(ItemStack p_111207_1_, EntityPlayer p_111207_2_, EntityLivingBase p_111207_3_)
+    {
+        //TODO add support for milking cows
+        return false;
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public void getSubItems(Item item, CreativeTabs tab, List list)
+    {
+        list.add(new ItemStack(item));
+
+        ItemStack stack1 = new ItemStack(item);
+        fill(stack1, new FluidStack(FluidRegistry.WATER, FluidContainerRegistry.BUCKET_VOLUME), true);
+        list.add(stack1);
+    }
+
+    @Override
+    public ItemStack getContainerItem(ItemStack itemStack)
+    {
+        if (isEmpty(itemStack))
+            return null;
+        return new ItemStack(this);
     }
 }
