@@ -8,7 +8,10 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -83,6 +86,7 @@ public class WoodenBucket
         }
 
         //TODO add crafting recipes for milk bucket
+        GameRegistry.addShapedRecipe(new ItemStack(itemBucket), " s ", "wcw", " w ", 'w', Blocks.planks, 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
     }
 
     @SideOnly(Side.CLIENT)

@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -178,8 +179,8 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         Block block = world.getBlock(i, j, k);
         Material material = block.getMaterial();
         int l = world.getBlockMetadata(i, j, k);
-
-        if (material == Material.water && l == 0)
+        
+        if (block == Blocks.water && l == 0)
         {
             if (world.setBlockToAir(i, j, k))
             {
@@ -188,7 +189,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                 return this.consumeBucket(itemstack, player, bucket);
             }
         }
-        else if (material == Material.lava && l == 0)
+        else if (block == Blocks.lava && l == 0)
         {
             if (world.setBlockToAir(i, j, k))
             {
@@ -197,15 +198,15 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                 return this.consumeBucket(itemstack, player, bucket);
             }
         }
-        else if (block instanceof IFluidBlock)
+        else if (block instanceof IFluidBlock && ((IFluidBlock) block).canDrain(world, i, j, k))
         {
-            FluidStack stack = ((IFluidBlock) block).drain(world, i, j, k, false);
+            FluidStack drainedFluid = ((IFluidBlock) block).drain(world, i, j, k, false);
             //TODO allow partial fills
-            if (stack != null && stack.getFluid() != null && stack.amount == FluidContainerRegistry.BUCKET_VOLUME)
+            if (drainedFluid != null && drainedFluid.getFluid() != null && drainedFluid.amount == FluidContainerRegistry.BUCKET_VOLUME)
             {
                 ItemStack bucket = new ItemStack(this);
                 ((IFluidBlock) block).drain(world, i, j, k, true);
-                fill(bucket, stack, true);
+                fill(bucket, drainedFluid, true);
                 return this.consumeBucket(itemstack, player, bucket);
             }
         }
