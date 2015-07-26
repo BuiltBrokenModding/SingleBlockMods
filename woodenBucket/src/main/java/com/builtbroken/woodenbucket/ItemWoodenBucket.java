@@ -9,106 +9,68 @@ import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.FillBucketEvent;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidContainerItem;
+import net.minecraftforge.fluids.*;
 
 /**
  * Created by Dark on 7/25/2015.
  */
 public class ItemWoodenBucket extends Item implements IFluidContainerItem
 {
-    /** field for checking if the bucket has been filled. */
-    private Block isFull;
-
     public ItemWoodenBucket()
     {
         this.maxStackSize = 1;
         this.setCreativeTab(CreativeTabs.tabMisc);
     }
 
-    /**
-     * Called whenever this item is equipped and the right mouse button is pressed. Args: itemStack, world, entityPlayer
-     */
-    public ItemStack onItemRightClick(ItemStack p_77659_1_, World p_77659_2_, EntityPlayer p_77659_3_)
+    @Override
+    public ItemStack onItemRightClick(ItemStack itemstack, World world, EntityPlayer player)
     {
-        boolean flag = this.isFull == Blocks.air;
-        MovingObjectPosition movingobjectposition = this.getMovingObjectPositionFromPlayer(p_77659_2_, p_77659_3_, flag);
+        boolean isBucketEmpty = this.isEmpty(itemstack);
+        MovingObjectPosition movingobjectposition = this.getMovingObjectPositionFromPlayer(world, player, isBucketEmpty);
 
-        if (movingobjectposition == null)
+        if (movingobjectposition != null)
         {
-            return p_77659_1_;
-        }
-        else
-        {
-            FillBucketEvent event = new FillBucketEvent(p_77659_3_, p_77659_1_, p_77659_2_, movingobjectposition);
+            //Forge event code, most likely this will do nothing but oh well... TODO check if mods assume bucket passed in is always a vanilla bucket
+            FillBucketEvent event = new FillBucketEvent(player, itemstack, world, movingobjectposition);
             if (MinecraftForge.EVENT_BUS.post(event))
             {
-                return p_77659_1_;
+                //Even was cancel for what ever reason
+                return itemstack;
             }
-
-            if (event.getResult() == Event.Result.ALLOW)
+            else if (event.getResult() == Event.Result.ALLOW)
             {
-                if (p_77659_3_.capabilities.isCreativeMode)
-                {
-                    return p_77659_1_;
-                }
-
-                if (--p_77659_1_.stackSize <= 0)
-                {
-                    return event.result;
-                }
-
-                if (!p_77659_3_.inventory.addItemStackToInventory(event.result))
-                {
-                    p_77659_3_.dropPlayerItemWithRandomChoice(event.result, false);
-                }
-
-                return p_77659_1_;
+                return consumeBucket(itemstack, player, event.result);
             }
+
+
             if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
             {
                 int i = movingobjectposition.blockX;
                 int j = movingobjectposition.blockY;
                 int k = movingobjectposition.blockZ;
 
-                if (!p_77659_2_.canMineBlock(p_77659_3_, i, j, k))
+                if (!world.canMineBlock(player, i, j, k))
                 {
-                    return p_77659_1_;
+                    return itemstack;
                 }
 
-                if (flag)
+                //Fill bucket code
+                if (isBucketEmpty)
                 {
-                    if (!p_77659_3_.canPlayerEdit(i, j, k, movingobjectposition.sideHit, p_77659_1_))
+                    if (player.canPlayerEdit(i, j, k, movingobjectposition.sideHit, itemstack))
                     {
-                        return p_77659_1_;
-                    }
-
-                    Material material = p_77659_2_.getBlock(i, j, k).getMaterial();
-                    int l = p_77659_2_.getBlockMetadata(i, j, k);
-
-                    if (material == Material.water && l == 0)
-                    {
-                        p_77659_2_.setBlockToAir(i, j, k);
-                        return this.func_150910_a(p_77659_1_, p_77659_3_, Items.water_bucket);
-                    }
-
-                    if (material == Material.lava && l == 0)
-                    {
-                        p_77659_2_.setBlockToAir(i, j, k);
-                        return this.func_150910_a(p_77659_1_, p_77659_3_, Items.lava_bucket);
+                        pickupFluid(player, itemstack, world, i, j, k);
                     }
                 }
-                else
+                else //Empty bucket code
                 {
-                    if (this.isFull == Blocks.air)
-                    {
-                        return new ItemStack(Items.bucket);
-                    }
 
+                    //Offset position based on side hit
                     if (movingobjectposition.sideHit == 0)
                     {
                         --j;
@@ -139,108 +101,279 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                         ++i;
                     }
 
-                    if (!p_77659_3_.canPlayerEdit(i, j, k, movingobjectposition.sideHit, p_77659_1_))
+                    if (player.canPlayerEdit(i, j, k, movingobjectposition.sideHit, itemstack))
                     {
-                        return p_77659_1_;
-                    }
-
-                    if (this.tryPlaceContainedLiquid(p_77659_2_, i, j, k) && !p_77659_3_.capabilities.isCreativeMode)
-                    {
-                        return new ItemStack(Items.bucket);
+                        placeFluid(player, itemstack, world, i, j, k);
                     }
                 }
             }
+        }
+        return itemstack;
 
-            return p_77659_1_;
+    }
+
+    protected ItemStack consumeBucket(ItemStack itemstack, EntityPlayer player, ItemStack item)
+    {
+        //Creative mode we don't care about items
+        if (player.capabilities.isCreativeMode)
+        {
+            return itemstack;
+        }
+        //If we only have one bucket consume and replace slot with new bucket
+        else if (--itemstack.stackSize <= 0)
+        {
+            return item;
+        }
+        //If we have more than one bucket try to add the new one to the player's inventory
+        else
+        {
+            if (!player.inventory.addItemStackToInventory(item))
+            {
+                player.dropPlayerItemWithRandomChoice(item, false);
+            }
+
+            return itemstack;
         }
     }
 
-    private ItemStack func_150910_a(ItemStack p_150910_1_, EntityPlayer p_150910_2_, Item p_150910_3_)
+    public void pickupFluid(EntityPlayer player, ItemStack itemstack, World world, int i, int j, int k)
     {
-        if (p_150910_2_.capabilities.isCreativeMode)
-        {
-            return p_150910_1_;
-        }
-        else if (--p_150910_1_.stackSize <= 0)
-        {
-            return new ItemStack(p_150910_3_);
-        }
-        else
-        {
-            if (!p_150910_2_.inventory.addItemStackToInventory(new ItemStack(p_150910_3_)))
-            {
-                p_150910_2_.dropPlayerItemWithRandomChoice(new ItemStack(p_150910_3_, 1, 0), false);
-            }
+        Block block = world.getBlock(i, j, k);
+        Material material = block.getMaterial();
+        int l = world.getBlockMetadata(i, j, k);
 
-            return p_150910_1_;
+        if (material == Material.water && l == 0)
+        {
+            if (world.setBlockToAir(i, j, k))
+            {
+                ItemStack bucket = new ItemStack(this);
+                fill(bucket, new FluidStack(FluidRegistry.WATER, FluidContainerRegistry.BUCKET_VOLUME), true);
+                this.consumeBucket(itemstack, player, bucket);
+            }
+        }
+        else if (material == Material.lava && l == 0)
+        {
+            if (world.setBlockToAir(i, j, k))
+            {
+                ItemStack bucket = new ItemStack(this);
+                fill(bucket, new FluidStack(FluidRegistry.LAVA, FluidContainerRegistry.BUCKET_VOLUME), true);
+                this.consumeBucket(itemstack, player, bucket);
+            }
+        }
+        else if (block instanceof IFluidBlock)
+        {
+            FluidStack stack = ((IFluidBlock) block).drain(world, i, j, k, false);
+            //TODO allow partial fills
+            if (stack != null && stack.getFluid() != null && stack.amount == FluidContainerRegistry.BUCKET_VOLUME)
+            {
+                ItemStack bucket = new ItemStack(this);
+                ((IFluidBlock) block).drain(world, i, j, k, true);
+                fill(bucket, stack, true);
+                this.consumeBucket(itemstack, player, bucket);
+            }
         }
     }
 
     /**
      * Attempts to place the liquid contained inside the bucket.
      */
-    public boolean tryPlaceContainedLiquid(World p_77875_1_, int p_77875_2_, int p_77875_3_, int p_77875_4_)
+    public void placeFluid(EntityPlayer player, ItemStack itemstack, World world, int x, int y, int z)
     {
-        if (this.isFull == Blocks.air)
+        Material material = world.getBlock(x, y, z).getMaterial();
+        if (!isEmpty(itemstack) && world.isAirBlock(x, y, z) && material.isSolid())
         {
-            return false;
-        }
-        else
-        {
-            Material material = p_77875_1_.getBlock(p_77875_2_, p_77875_3_, p_77875_4_).getMaterial();
-            boolean flag = !material.isSolid();
-
-            if (!p_77875_1_.isAirBlock(p_77875_2_, p_77875_3_, p_77875_4_) && !flag)
+            FluidStack stack = getFluid(itemstack);
+            if (stack != null && stack.getFluid() != null && stack.getFluid().canBePlacedInWorld() && stack.getFluid().getBlock() != null)
             {
-                return false;
-            }
-            else
-            {
-                if (p_77875_1_.provider.isHellWorld && this.isFull == Blocks.flowing_water)
+                if (stack.amount == FluidContainerRegistry.BUCKET_VOLUME)
                 {
-                    p_77875_1_.playSoundEffect((double) ((float) p_77875_2_ + 0.5F), (double) ((float) p_77875_3_ + 0.5F), (double) ((float) p_77875_4_ + 0.5F), "random.fizz", 0.5F, 2.6F + (p_77875_1_.rand.nextFloat() - p_77875_1_.rand.nextFloat()) * 0.8F);
-
-                    for (int l = 0; l < 8; ++l)
+                    if (world.provider.isHellWorld && stack.getFluid().getBlock() == Blocks.flowing_water)
                     {
-                        p_77875_1_.spawnParticle("largesmoke", (double) p_77875_2_ + Math.random(), (double) p_77875_3_ + Math.random(), (double) p_77875_4_ + Math.random(), 0.0D, 0.0D, 0.0D);
+                        //TODO unit test to ensure functionality
+                        world.playSoundEffect((double) ((float) x + 0.5F), (double) ((float) y + 0.5F), (double) ((float) z + 0.5F), "random.fizz", 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
+
+                        for (int l = 0; l < 8; ++l)
+                        {
+                            world.spawnParticle("largesmoke", (double) x + Math.random(), (double) y + Math.random(), (double) z + Math.random(), 0.0D, 0.0D, 0.0D);
+                        }
+                        //TODO unit test to ensure functionality
+                        consumeBucket(itemstack, player, new ItemStack(this));
+                    }
+                    else
+                    {
+                        //TODO unit test to ensure functionality
+                        if (!world.isRemote && !material.isLiquid())
+                        {
+                            world.func_147480_a(x, y, z, true);
+                        }
+
+                        if (world.setBlock(x, y, z, stack.getFluid().getBlock(), 0, 3))
+                            consumeBucket(itemstack, player, new ItemStack(this));
                     }
                 }
-                else
-                {
-                    if (!p_77875_1_.isRemote && flag && !material.isLiquid())
-                    {
-                        p_77875_1_.func_147480_a(p_77875_2_, p_77875_3_, p_77875_4_, true);
-                    }
-
-                    p_77875_1_.setBlock(p_77875_2_, p_77875_3_, p_77875_4_, this.isFull, 0, 3);
-                }
-
-                return true;
+                //TODO add support for blocks that can be filled without the bucket being full, IFluidBlock
             }
         }
     }
 
+    /**
+     * Helper method to check if the bucket is empty
+     *
+     * @param container - bucket
+     * @return true if it is empty
+     */
+    public boolean isEmpty(ItemStack container)
+    {
+        return getFluid(container) == null;
+    }
+
+    /**
+     * Helper method to check if the bucket is full
+     *
+     * @param container - bucket
+     * @return true if it is full
+     */
+    public boolean isFull(ItemStack container)
+    {
+        FluidStack stack = getFluid(container);
+        if (stack != null)
+        {
+            return stack.amount == getCapacity(container);
+        }
+        return false;
+    }
+
+    /* IFluidContainerItem */
     @Override
     public FluidStack getFluid(ItemStack container)
     {
-        return null;
+        if (container.stackTagCompound == null || !container.stackTagCompound.hasKey("Fluid"))
+        {
+            return null;
+        }
+        return FluidStack.loadFluidStackFromNBT(container.stackTagCompound.getCompoundTag("Fluid"));
     }
 
     @Override
     public int getCapacity(ItemStack container)
     {
-        return 0;
+        return FluidContainerRegistry.BUCKET_VOLUME;
     }
 
     @Override
     public int fill(ItemStack container, FluidStack resource, boolean doFill)
     {
+        if (resource != null)
+        {
+            if (!doFill)
+            {
+                if (container.stackTagCompound == null || !container.stackTagCompound.hasKey("Fluid"))
+                {
+                    return Math.min(getCapacity(container), resource.amount);
+                }
+
+                FluidStack stack = FluidStack.loadFluidStackFromNBT(container.stackTagCompound.getCompoundTag("Fluid"));
+
+                if (stack == null)
+                {
+                    return Math.min(getCapacity(container), resource.amount);
+                }
+
+                if (!stack.isFluidEqual(resource))
+                {
+                    return 0;
+                }
+
+                return Math.min(getCapacity(container) - stack.amount, resource.amount);
+            }
+
+            if (container.stackTagCompound == null)
+            {
+                container.stackTagCompound = new NBTTagCompound();
+            }
+
+            if (!container.stackTagCompound.hasKey("Fluid"))
+            {
+                NBTTagCompound fluidTag = resource.writeToNBT(new NBTTagCompound());
+
+                if (getCapacity(container) < resource.amount)
+                {
+                    fluidTag.setInteger("Amount", getCapacity(container));
+                    container.stackTagCompound.setTag("Fluid", fluidTag);
+                    return getCapacity(container);
+                }
+
+                container.stackTagCompound.setTag("Fluid", fluidTag);
+                return resource.amount;
+            }
+            else
+            {
+
+                NBTTagCompound fluidTag = container.stackTagCompound.getCompoundTag("Fluid");
+                FluidStack stack = FluidStack.loadFluidStackFromNBT(fluidTag);
+
+                if (!stack.isFluidEqual(resource))
+                {
+                    return 0;
+                }
+
+                int filled = getCapacity(container) - stack.amount;
+                if (resource.amount < filled)
+                {
+                    stack.amount += resource.amount;
+                    filled = resource.amount;
+                }
+                else
+                {
+                    stack.amount = getCapacity(container);
+                }
+
+                container.stackTagCompound.setTag("Fluid", stack.writeToNBT(fluidTag));
+                return filled;
+            }
+        }
         return 0;
     }
 
     @Override
     public FluidStack drain(ItemStack container, int maxDrain, boolean doDrain)
     {
-        return null;
+        if (container.stackTagCompound == null || !container.stackTagCompound.hasKey("Fluid"))
+        {
+            return null;
+        }
+
+        FluidStack stack = FluidStack.loadFluidStackFromNBT(container.stackTagCompound.getCompoundTag("Fluid"));
+        if (stack == null)
+        {
+            return null;
+        }
+
+        int currentAmount = stack.amount;
+        stack.amount = Math.min(stack.amount, maxDrain);
+        if (doDrain)
+        {
+            if (currentAmount == stack.amount)
+            {
+                container.stackTagCompound.removeTag("Fluid");
+
+                if (container.stackTagCompound.hasNoTags())
+                {
+                    container.stackTagCompound = null;
+                }
+                return stack;
+            }
+
+            NBTTagCompound fluidTag = container.stackTagCompound.getCompoundTag("Fluid");
+            fluidTag.setInteger("Amount", currentAmount - stack.amount);
+            container.stackTagCompound.setTag("Fluid", fluidTag);
+        }
+        return stack;
+    }
+
+    @Override
+    public int getItemStackLimit(ItemStack stack)
+    {
+        return isEmpty(stack) ? Items.bucket.getItemStackLimit() : 1;
     }
 }
