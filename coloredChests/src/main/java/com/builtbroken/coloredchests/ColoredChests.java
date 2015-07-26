@@ -1,10 +1,14 @@
 package com.builtbroken.coloredchests;
 
+import com.builtbroken.coloredchests.chests.BlockChest;
+import com.builtbroken.coloredchests.chests.TileChest;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraft.block.Block;
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,6 +29,8 @@ public class ColoredChests
 
     public static Logger LOGGER;
 
+    public static Block blockChest;
+
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
@@ -35,6 +41,10 @@ public class ColoredChests
 
         config.save();
         proxy.preInit();
+
+        blockChest = new BlockChest();
+        GameRegistry.registerBlock(blockChest, "coloredChest");
+        GameRegistry.registerTileEntity(TileChest.class, "coloredChest");
     }
 
     @Mod.EventHandler

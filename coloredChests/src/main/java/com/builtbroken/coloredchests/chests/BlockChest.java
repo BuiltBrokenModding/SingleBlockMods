@@ -33,13 +33,14 @@ import static net.minecraftforge.common.util.ForgeDirection.DOWN;
  */
 public class BlockChest extends BlockContainer
 {
-    private final Random field_149955_b = new Random();
-    public final int field_149956_a;
+    private final Random random = new Random();
+    public final int checkType;
 
-    protected BlockChest(int p_i45397_1_)
+    public BlockChest()
     {
         super(Material.wood);
-        this.field_149956_a = p_i45397_1_;
+        this.checkType = 0;
+        this.setBlockName("coloredChest");
         this.setCreativeTab(CreativeTabs.tabDecorations);
         this.setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.875F, 0.9375F);
     }
@@ -363,13 +364,13 @@ public class BlockChest extends BlockContainer
 
                 if (itemstack != null)
                 {
-                    float f = this.field_149955_b.nextFloat() * 0.8F + 0.1F;
-                    float f1 = this.field_149955_b.nextFloat() * 0.8F + 0.1F;
+                    float f = this.random.nextFloat() * 0.8F + 0.1F;
+                    float f1 = this.random.nextFloat() * 0.8F + 0.1F;
                     EntityItem entityitem;
 
-                    for (float f2 = this.field_149955_b.nextFloat() * 0.8F + 0.1F; itemstack.stackSize > 0; world.spawnEntityInWorld(entityitem))
+                    for (float f2 = this.random.nextFloat() * 0.8F + 0.1F; itemstack.stackSize > 0; world.spawnEntityInWorld(entityitem))
                     {
-                        int j1 = this.field_149955_b.nextInt(21) + 10;
+                        int j1 = this.random.nextInt(21) + 10;
 
                         if (j1 > itemstack.stackSize)
                         {
@@ -379,9 +380,9 @@ public class BlockChest extends BlockContainer
                         itemstack.stackSize -= j1;
                         entityitem = new EntityItem(world, (double) ((float) x + f), (double) ((float) y + f1), (double) ((float) z + f2), new ItemStack(itemstack.getItem(), j1, itemstack.getItemDamage()));
                         float f3 = 0.05F;
-                        entityitem.motionX = (double) ((float) this.field_149955_b.nextGaussian() * f3);
-                        entityitem.motionY = (double) ((float) this.field_149955_b.nextGaussian() * f3 + 0.2F);
-                        entityitem.motionZ = (double) ((float) this.field_149955_b.nextGaussian() * f3);
+                        entityitem.motionX = (double) ((float) this.random.nextGaussian() * f3);
+                        entityitem.motionY = (double) ((float) this.random.nextGaussian() * f3 + 0.2F);
+                        entityitem.motionZ = (double) ((float) this.random.nextGaussian() * f3);
 
                         if (itemstack.hasTagCompound())
                         {
@@ -484,7 +485,7 @@ public class BlockChest extends BlockContainer
     @Override
     public boolean canProvidePower()
     {
-        return this.field_149956_a == 1;
+        return this.checkType == 1;
     }
 
     @Override

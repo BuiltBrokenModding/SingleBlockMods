@@ -6,7 +6,6 @@ import net.minecraft.client.model.ModelChest;
 import net.minecraft.client.model.ModelLargeChest;
 import net.minecraft.client.renderer.tileentity.TileEntitySpecialRenderer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.ResourceLocation;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -27,7 +26,6 @@ public class RenderChest extends TileEntitySpecialRenderer
     private ModelChest field_147510_h = new ModelChest();
     private ModelChest field_147511_i = new ModelLargeChest();
     private boolean field_147509_j;
-    private static final String __OBFID = "CL_00000965";
 
     public RenderChest()
     {
@@ -39,7 +37,7 @@ public class RenderChest extends TileEntitySpecialRenderer
         }
     }
 
-    public void renderTileEntityAt(TileEntityChest tile, double xx, double yy, double zz, float deltaTime)
+    public void renderTileEntityAt(TileChest tile, double xx, double yy, double zz, float deltaTime)
     {
         int i;
 
@@ -52,11 +50,11 @@ public class RenderChest extends TileEntitySpecialRenderer
             Block block = tile.getBlockType();
             i = tile.getBlockMetadata();
 
-            if (block instanceof net.minecraft.block.BlockChest && i == 0)
+            if (block instanceof BlockChest && i == 0)
             {
                 try
                 {
-                    ((net.minecraft.block.BlockChest)block).func_149954_e(tile.getWorldObj(), tile.xCoord, tile.yCoord, tile.zCoord);
+                    ((BlockChest)block).func_149954_e(tile.getWorldObj(), tile.xCoord, tile.yCoord, tile.zCoord);
                 }
                 catch (ClassCastException e)
                 {
@@ -183,6 +181,6 @@ public class RenderChest extends TileEntitySpecialRenderer
     @Override
     public void renderTileEntityAt(TileEntity tile, double xx, double yy, double zz, float deltaTime)
     {
-        this.renderTileEntityAt((TileEntityChest)tile, xx, yy, zz, deltaTime);
+        this.renderTileEntityAt((TileChest)tile, xx, yy, zz, deltaTime);
     }
 }
