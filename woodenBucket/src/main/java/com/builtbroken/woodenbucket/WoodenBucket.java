@@ -18,6 +18,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.oredict.OreDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -86,8 +87,20 @@ public class WoodenBucket
         }
 
         //TODO add crafting recipes for milk bucket
-        GameRegistry.addShapedRecipe(new ItemStack(itemBucket), " s ", "wcw", " w ", 'w', Blocks.planks, 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
-
+        // TODO add proper ore shaped recipes so modded sticks and other items can be used in the recipes
+        GameRegistry.addShapedRecipe(new ItemStack(itemBucket, 1, ItemWoodenBucket.BucketTypes.OAK.ordinal()), " s ", "wcw", " w ", 'w', new ItemStack(Blocks.planks, 1, 0), 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
+        GameRegistry.addShapedRecipe(new ItemStack(itemBucket, 1, ItemWoodenBucket.BucketTypes.SPRUCE.ordinal()), " s ", "wcw", " w ", 'w', new ItemStack(Blocks.planks, 1, 1), 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
+        GameRegistry.addShapedRecipe(new ItemStack(itemBucket, 1, ItemWoodenBucket.BucketTypes.BIRCH.ordinal()), " s ", "wcw", " w ", 'w', new ItemStack(Blocks.planks, 1, 2), 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
+        GameRegistry.addShapedRecipe(new ItemStack(itemBucket, 1, ItemWoodenBucket.BucketTypes.JUNGLE.ordinal()), " s ", "wcw", " w ", 'w', new ItemStack(Blocks.planks, 1, 3), 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
+        GameRegistry.addShapedRecipe(new ItemStack(itemBucket, 1, ItemWoodenBucket.BucketTypes.ACACIA.ordinal()), " s ", "wcw", " w ", 'w', new ItemStack(Blocks.planks, 1, 4), 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
+        GameRegistry.addShapedRecipe(new ItemStack(itemBucket, 1, ItemWoodenBucket.BucketTypes.BIG_OAK.ordinal()), " s ", "wcw", " w ", 'w', new ItemStack(Blocks.planks, 1, 5), 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
+        for(ItemStack itemstack : OreDictionary.getOres("planks"))
+        {
+            if(itemstack != null && itemstack.getItem() != Item.getItemFromBlock(Blocks.planks))
+            {
+                GameRegistry.addShapedRecipe(new ItemStack(itemBucket, 1, ItemWoodenBucket.BucketTypes.OAK.ordinal()), " s ", "wcw", " w ", 'w', itemstack, 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
+            }
+        }
     }
 
     @SideOnly(Side.CLIENT)

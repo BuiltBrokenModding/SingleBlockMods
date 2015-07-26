@@ -43,10 +43,28 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     @SideOnly(Side.CLIENT)
     public static IIcon blankTexture;
 
+    @SideOnly(Side.CLIENT)
+    public static IIcon acaciaTexture;
+
+    @SideOnly(Side.CLIENT)
+    public static IIcon birchTexture;
+
+    @SideOnly(Side.CLIENT)
+    public static IIcon jungleTexture;
+
+    @SideOnly(Side.CLIENT)
+    public static IIcon spruceTexture;
+
+    @SideOnly(Side.CLIENT)
+    public static IIcon charredTexture;
+
+    @SideOnly(Side.CLIENT)
+    public static IIcon bigOakTexture;
+
     public static HashMap<String, IIcon> fluidToIconMap = new HashMap();
 
     //TODO rename to fluid.molten
-    public static String[] supportedFluidTextures = new String[]{"milk", "blood","slime.blue", "fuel", "molten_aluminum", "glue", "molten_alubrass", "molten_alumite", "molten_angmallen", "molten_ardite", "molten_bronze", "molten_cobalt", "molten_copper", "molten_electrum", "molten_emerald", "molten_ender", "molten_enderium", "molten_glass", "molten_gold", "molten_invar", "molten_iron", "molten_lead", "molten_lumium", "molten_manyulln", "molten_mithril", "molten_nickel", "molten_obsidian", "molten_pigiron", "molten_shiny", "molten_signalum", "molten_silver", "molten_steel", "molten_tin", "oil", "redplasma"};
+    public static String[] supportedFluidTextures = new String[]{"milk", "blood", "slime.blue", "fuel", "aluminum.molten", "glue", "alubrass.molten", "alumite.molten", "angmallen.molten", "ardite.molten", "bronze.molten", "cobalt.molten", "copper.molten", "electrum.molten", "emerald.molten", "ender.molten", "enderium.molten", "glass.molten", "gold.molten", "invar.molten", "iron.molten", "lead.molten", "lumium.molten", "manyullyn.molten", "mithril.molten", "nickel.molten", "obsidian.molten", "pigiron.molten", "shiny.molten", "signalum.molten", "silver.molten", "steel.molten", "tin.molten", "oil", "redplasma"};
 
     public ItemWoodenBucket()
     {
@@ -109,7 +127,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                 else //Empty bucket code
                 {
                     Material material = world.getBlock(i, j, k).getMaterial();
-                    if(material.isLiquid() || !material.isSolid())
+                    if (material.isLiquid() || !material.isSolid())
                         return itemstack;
                     //Offset position based on side hit
                     if (movingobjectposition.sideHit == 0)
@@ -186,7 +204,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         {
             if (world.setBlockToAir(i, j, k))
             {
-                ItemStack bucket = new ItemStack(this);
+                ItemStack bucket = new ItemStack(this, 1, itemstack.getItemDamage());
                 fill(bucket, new FluidStack(FluidRegistry.WATER, FluidContainerRegistry.BUCKET_VOLUME), true);
                 return this.consumeBucket(itemstack, player, bucket);
             }
@@ -195,7 +213,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         {
             if (world.setBlockToAir(i, j, k))
             {
-                ItemStack bucket = new ItemStack(this);
+                ItemStack bucket = new ItemStack(this, 1, itemstack.getItemDamage());
                 fill(bucket, new FluidStack(FluidRegistry.LAVA, FluidContainerRegistry.BUCKET_VOLUME), true);
                 return this.consumeBucket(itemstack, player, bucket);
             }
@@ -206,7 +224,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
             //TODO allow partial fills
             if (drainedFluid != null && drainedFluid.getFluid() != null && drainedFluid.amount == FluidContainerRegistry.BUCKET_VOLUME)
             {
-                ItemStack bucket = new ItemStack(this);
+                ItemStack bucket = new ItemStack(this, 1, itemstack.getItemDamage());
                 ((IFluidBlock) block).drain(world, i, j, k, true);
                 fill(bucket, drainedFluid, true);
                 return this.consumeBucket(itemstack, player, bucket);
@@ -234,7 +252,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                     {
                         world.spawnParticle("largesmoke", (double) x + Math.random(), (double) y + Math.random(), (double) z + Math.random(), 0.0D, 0.0D, 0.0D);
                     }
-                    return consumeBucket(itemstack, player, new ItemStack(this));
+                    return consumeBucket(itemstack, player, new ItemStack(this, 1, itemstack.getItemDamage()));
                 }
                 else
                 {
@@ -244,7 +262,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                     }
 
                     world.setBlock(x, y, z, stack.getFluid().getBlock(), 0, 3);
-                    return consumeBucket(itemstack, player, new ItemStack(this));
+                    return consumeBucket(itemstack, player, new ItemStack(this, 1, itemstack.getItemDamage()));
                 }
             }
         }
@@ -416,14 +434,20 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     @Override
     public void registerIcons(IIconRegister reg)
     {
-        this.itemIcon = reg.registerIcon(WoodenBucket.PREFIX + "bucket");
-        this.fluidTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.fluid");
-        this.lavaTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.lava");
-        this.blankTexture = reg.registerIcon(WoodenBucket.PREFIX + "blank");
+        itemIcon = reg.registerIcon(WoodenBucket.PREFIX + "bucket.oak");
+        acaciaTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.acacia");
+        birchTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.birch");
+        jungleTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.jungle");
+        spruceTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.spruce");
+        charredTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.charred");
+        bigOakTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.big_oak");
+        fluidTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.fluid");
+        lavaTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.lava");
+        blankTexture = reg.registerIcon(WoodenBucket.PREFIX + "blank");
 
-        for(String string : supportedFluidTextures)
+        for (String string : supportedFluidTextures)
         {
-            fluidToIconMap.put("string", reg.registerIcon(WoodenBucket.PREFIX + "bucket." + string));
+            fluidToIconMap.put(string, reg.registerIcon(WoodenBucket.PREFIX + "bucket." + string));
         }
     }
 
@@ -435,14 +459,66 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         {
             if (isEmpty(stack))
                 return blankTexture;
-            else if (getFluid(stack).getFluid() == FluidRegistry.LAVA || getFluid(stack).getFluid().getTemperature() > 600)
-                return lavaTexture;
             else if (fluidToIconMap.containsKey(getFluid(stack).getFluid().getName()))
                 return fluidToIconMap.get(getFluid(stack).getFluid().getName());
+            else if (getFluid(stack).getFluid() == FluidRegistry.LAVA || getFluid(stack).getFluid().getTemperature() > 600)
+                return lavaTexture;
             else
                 return fluidTexture;
         }
         return super.getIcon(stack, pass);
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public IIcon getIconFromDamage(int meta)
+    {
+        if (meta > 0 && meta < BucketTypes.values().length)
+        {
+            switch (BucketTypes.values()[meta])
+            {
+                case ACACIA:
+                    return acaciaTexture;
+                case BIRCH:
+                    return birchTexture;
+                case JUNGLE:
+                    return jungleTexture;
+                case SPRUCE:
+                    return spruceTexture;
+                case BIG_OAK:
+                    return bigOakTexture;
+                case CHARRED:
+                    return charredTexture;
+            }
+        }
+        return this.itemIcon;
+    }
+
+    @Override
+    public String getUnlocalizedName(ItemStack stack)
+    {
+        int meta = stack.getItemDamage();
+        if (meta > 0 && meta < BucketTypes.values().length)
+        {
+            switch (BucketTypes.values()[meta])
+            {
+                case OAK:
+                    return super.getUnlocalizedName() + ".oak";
+                case ACACIA:
+                    return super.getUnlocalizedName() + ".acacia";
+                case BIRCH:
+                    return super.getUnlocalizedName() + ".birch";
+                case JUNGLE:
+                    return super.getUnlocalizedName() + ".jungle";
+                case SPRUCE:
+                    return super.getUnlocalizedName() + ".spruce";
+                case BIG_OAK:
+                    return super.getUnlocalizedName() + ".big_oak";
+                case CHARRED:
+                    return super.getUnlocalizedName() + ".charred";
+            }
+        }
+        return super.getUnlocalizedName();
     }
 
     @SideOnly(Side.CLIENT)
@@ -465,21 +541,25 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     public void onUpdate(ItemStack stack, World world, Entity entity, int slot, boolean held)
     {
         FluidStack fluid = getFluid(stack);
-        if (WoodenBucket.PREVENT_HOT_FLUID_USAGE && fluid != null && fluid.getFluid() != null && fluid.getFluid().getTemperature(fluid) > 400)
+        if (world.getWorldTime() % 5 == 0)
         {
-            //Default 26% chance to be caught on fire
-            if (WoodenBucket.BURN_ENTITY_WITH_HOT_FLUID && entity instanceof EntityLivingBase && world.getWorldTime() % 5 == 0 && world.rand.nextFloat() < ((float) fluid.getFluid().getTemperature(fluid) / 1500f))
+            if (WoodenBucket.PREVENT_HOT_FLUID_USAGE && fluid != null && fluid.getFluid() != null && fluid.getFluid().getTemperature(fluid) > 400)
             {
-                EntityLivingBase living = (EntityLivingBase) entity;
-                if (!living.isImmuneToFire())
+                //Default 26% chance to be caught on fire
+                if (WoodenBucket.BURN_ENTITY_WITH_HOT_FLUID && entity instanceof EntityLivingBase && world.rand.nextFloat() < ((float) fluid.getFluid().getTemperature(fluid) / 1500f))
                 {
-                    living.setFire(1 + world.rand.nextInt(15));
+                    EntityLivingBase living = (EntityLivingBase) entity;
+                    if (!living.isImmuneToFire())
+                    {
+                        living.setFire(1 + world.rand.nextInt(15));
+                    }
+                    //TODO implement direct damage based on armor, or leave that to ItHurtsToDie?
                 }
-                //TODO implement direct damage based on armor, or leave that to ItHurtsToDie?
-            }
-            if (WoodenBucket.DAMAGE_BUCKET_WITH_HOT_FLUID)
-            {
-
+                if (WoodenBucket.DAMAGE_BUCKET_WITH_HOT_FLUID && world.rand.nextFloat() < ((float) fluid.getFluid().getTemperature(fluid) / 1500f))
+                {
+                    //TODO play sound effect of items burning
+                    stack.setItemDamage(BucketTypes.CHARRED.ordinal());
+                }
             }
         }
     }
@@ -488,13 +568,18 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     public boolean onEntityItemUpdate(EntityItem entityItem)
     {
         FluidStack fluid = getFluid(entityItem.getEntityItem());
-        if (WoodenBucket.PREVENT_HOT_FLUID_USAGE && fluid != null && fluid.getFluid() != null && fluid.getFluid().getTemperature(fluid) > 400)
+        if (entityItem.worldObj.getWorldTime() % 5 == 0)
         {
-            if (WoodenBucket.DAMAGE_BUCKET_WITH_HOT_FLUID)
+            if (WoodenBucket.PREVENT_HOT_FLUID_USAGE && fluid != null && fluid.getFluid() != null && fluid.getFluid().getTemperature(fluid) > 400)
             {
-                //TODO damage bucket if has molten fluid
+                if (WoodenBucket.DAMAGE_BUCKET_WITH_HOT_FLUID && entityItem.worldObj.rand.nextFloat() < ((float) fluid.getFluid().getTemperature(fluid) / 1500f))
+                {
+                    //TODO play sound effect of items burning
+                    //TODO add slightly burnt, crisp, and ash version of the bucket to simulate each time it gets damaged
+                    entityItem.getEntityItem().setItemDamage(BucketTypes.CHARRED.ordinal());
+                }
+                //TODO chance to catch area on fire around it
             }
-            //TODO chance to catch area on fire around it
         }
         return false;
     }
@@ -509,9 +594,9 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
             Fluid fluid = FluidRegistry.getFluid("milk");
             if (fluid != null)
             {
-                ItemStack newBucket = new ItemStack(this);
+                ItemStack newBucket = new ItemStack(this, 1, stack.getItemDamage());
                 fill(newBucket, new FluidStack(fluid, FluidContainerRegistry.BUCKET_VOLUME), true);
-                player.inventory.setInventorySlotContents(player.inventory.currentItem, consumeBucket(new ItemStack(this), player, newBucket));
+                player.inventory.setInventorySlotContents(player.inventory.currentItem, consumeBucket(stack, player, newBucket));
                 player.inventoryContainer.detectAndSendChanges();
             }
             else
@@ -528,25 +613,42 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     @Override
     public void getSubItems(Item item, CreativeTabs tab, List list)
     {
-        list.add(new ItemStack(item));
+        for (BucketTypes type : BucketTypes.values())
+        {
+            list.add(new ItemStack(item, 1, type.ordinal()));
+        }
 
         ItemStack waterBucket = new ItemStack(item);
         fill(waterBucket, new FluidStack(FluidRegistry.WATER, FluidContainerRegistry.BUCKET_VOLUME), true);
         list.add(waterBucket);
 
-        if (FluidRegistry.getFluid("milk") != null)
+        for (String string : supportedFluidTextures)
         {
-            ItemStack milkBucket = new ItemStack(item);
-            fill(milkBucket, new FluidStack(FluidRegistry.getFluid("milk"), FluidContainerRegistry.BUCKET_VOLUME), true);
-            list.add(milkBucket);
+            if (FluidRegistry.getFluid(string) != null)
+            {
+                ItemStack milkBucket = new ItemStack(item);
+                fill(milkBucket, new FluidStack(FluidRegistry.getFluid(string), FluidContainerRegistry.BUCKET_VOLUME), true);
+                list.add(milkBucket);
+            }
         }
     }
 
     @Override
-    public ItemStack getContainerItem(ItemStack itemStack)
+    public ItemStack getContainerItem(ItemStack itemstack)
     {
-        if (isEmpty(itemStack))
+        if (isEmpty(itemstack))
             return null;
-        return new ItemStack(this);
+        return new ItemStack(this, itemstack.getItemDamage());
+    }
+
+    public enum BucketTypes
+    {
+        OAK,
+        ACACIA,
+        BIRCH,
+        JUNGLE,
+        SPRUCE,
+        BIG_OAK,
+        CHARRED
     }
 }
