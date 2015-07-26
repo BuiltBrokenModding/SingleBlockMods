@@ -10,12 +10,14 @@ import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityCow;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
@@ -35,6 +37,12 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     public static IIcon fluidTexture;
 
     @SideOnly(Side.CLIENT)
+    public static IIcon lavaTexture;
+
+    @SideOnly(Side.CLIENT)
+    public static IIcon milkTexture;
+
+    @SideOnly(Side.CLIENT)
     public static IIcon blankTexture;
 
     public ItemWoodenBucket()
@@ -51,7 +59,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         if (!isEmpty(stack))
         {
             list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.name") + ": " + getFluid(stack).getLocalizedName());
-            list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.amount.name") + ": " + getFluid(stack).amount +"mb");
+            list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.amount.name") + ": " + getFluid(stack).amount + "mb");
         }
     }
 
@@ -92,7 +100,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                 {
                     if (player.canPlayerEdit(i, j, k, movingobjectposition.sideHit, itemstack))
                     {
-                        pickupFluid(player, itemstack, world, i, j, k);
+                        return pickupFluid(player, itemstack, world, i, j, k);
                     }
                 }
                 else //Empty bucket code
@@ -131,7 +139,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
 
                     if (player.canPlayerEdit(i, j, k, movingobjectposition.sideHit, itemstack))
                     {
-                        placeFluid(player, itemstack, world, i, j, k);
+                        return placeFluid(player, itemstack, world, i, j, k);
                     }
                 }
             }
@@ -164,7 +172,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         }
     }
 
-    public void pickupFluid(EntityPlayer player, ItemStack itemstack, World world, int i, int j, int k)
+    public ItemStack pickupFluid(EntityPlayer player, ItemStack itemstack, World world, int i, int j, int k)
     {
         Block block = world.getBlock(i, j, k);
         Material material = block.getMaterial();
@@ -176,7 +184,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
             {
                 ItemStack bucket = new ItemStack(this);
                 fill(bucket, new FluidStack(FluidRegistry.WATER, FluidContainerRegistry.BUCKET_VOLUME), true);
-                this.consumeBucket(itemstack, player, bucket);
+                return this.consumeBucket(itemstack, player, bucket);
             }
         }
         else if (material == Material.lava && l == 0)
@@ -185,7 +193,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
             {
                 ItemStack bucket = new ItemStack(this);
                 fill(bucket, new FluidStack(FluidRegistry.LAVA, FluidContainerRegistry.BUCKET_VOLUME), true);
-                this.consumeBucket(itemstack, player, bucket);
+                return this.consumeBucket(itemstack, player, bucket);
             }
         }
         else if (block instanceof IFluidBlock)
@@ -197,15 +205,16 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                 ItemStack bucket = new ItemStack(this);
                 ((IFluidBlock) block).drain(world, i, j, k, true);
                 fill(bucket, stack, true);
-                this.consumeBucket(itemstack, player, bucket);
+                return this.consumeBucket(itemstack, player, bucket);
             }
         }
+        return itemstack;
     }
 
     /**
      * Attempts to place the liquid contained inside the bucket.
      */
-    public void placeFluid(EntityPlayer player, ItemStack itemstack, World world, int x, int y, int z)
+    public ItemStack placeFluid(EntityPlayer player, ItemStack itemstack, World world, int x, int y, int z)
     {
         Material material = world.getBlock(x, y, z).getMaterial();
         if (!isEmpty(itemstack) && world.isAirBlock(x, y, z) && material.isSolid())
@@ -225,7 +234,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                             world.spawnParticle("largesmoke", (double) x + Math.random(), (double) y + Math.random(), (double) z + Math.random(), 0.0D, 0.0D, 0.0D);
                         }
                         //TODO unit test to ensure functionality
-                        consumeBucket(itemstack, player, new ItemStack(this));
+                        return consumeBucket(itemstack, player, new ItemStack(this));
                     }
                     else
                     {
@@ -236,12 +245,13 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                         }
 
                         if (world.setBlock(x, y, z, stack.getFluid().getBlock(), 0, 3))
-                            consumeBucket(itemstack, player, new ItemStack(this));
+                            return consumeBucket(itemstack, player, new ItemStack(this));
                     }
                 }
                 //TODO add support for blocks that can be filled without the bucket being full, IFluidBlock
             }
         }
+        return itemstack;
     }
 
     /**
@@ -411,6 +421,8 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     {
         this.itemIcon = reg.registerIcon(WoodenBucket.PREFIX + "bucket");
         this.fluidTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.fluid");
+        this.lavaTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.lava");
+        this.milkTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.milk");
         this.blankTexture = reg.registerIcon(WoodenBucket.PREFIX + "blank");
     }
 
@@ -422,6 +434,10 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         {
             if (isEmpty(stack))
                 return blankTexture;
+            else if (getFluid(stack).getFluid() == FluidRegistry.LAVA)
+                return lavaTexture;
+            else if (getFluid(stack).getUnlocalizedName().contains("milk"))
+                return milkTexture;
             else
                 return fluidTexture;
         }
@@ -447,22 +463,63 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     @Override
     public void onUpdate(ItemStack stack, World world, Entity entity, int p_77663_4_, boolean p_77663_5_)
     {
-        //TODO damage bucket if has molten fluid
-        //TODO burn entity if has molten fluid
+        FluidStack fluid = getFluid(stack);
+        if (WoodenBucket.PREVENT_HOT_FLUID_USAGE && fluid != null && fluid.getFluid() != null && fluid.getFluid().getTemperature(fluid) > 400)
+        {
+            //Default 26% chance to be caught on fire
+            if (WoodenBucket.BURN_ENTITY_WITH_HOT_FLUID && entity instanceof EntityLivingBase && world.getWorldTime() % 5 == 0 && world.rand.nextFloat() < ((float) fluid.getFluid().getTemperature(fluid) / 1500f))
+            {
+                EntityLivingBase living = (EntityLivingBase) entity;
+                if (!living.isImmuneToFire())
+                {
+                    living.setFire(1 + world.rand.nextInt(15));
+                }
+                //TODO implement direct damage based on armor, or leave that to ItHurtsToDie?
+            }
+            if (WoodenBucket.DAMAGE_BUCKET_WITH_HOT_FLUID)
+            {
+
+            }
+        }
     }
 
     @Override
     public boolean onEntityItemUpdate(EntityItem entityItem)
     {
-        //TODO damage bucket if has molten fluid
-        //TODO chance to catch area on fire around it
+        FluidStack fluid = getFluid(entityItem.getEntityItem());
+        if (WoodenBucket.PREVENT_HOT_FLUID_USAGE && fluid != null && fluid.getFluid() != null && fluid.getFluid().getTemperature(fluid) > 400)
+        {
+            if (WoodenBucket.DAMAGE_BUCKET_WITH_HOT_FLUID)
+            {
+                //TODO damage bucket if has molten fluid
+            }
+            //TODO chance to catch area on fire around it
+        }
         return false;
     }
 
     @Override
-    public boolean itemInteractionForEntity(ItemStack p_111207_1_, EntityPlayer p_111207_2_, EntityLivingBase p_111207_3_)
+    public boolean itemInteractionForEntity(ItemStack stack, EntityPlayer player, EntityLivingBase entity)
     {
-        //TODO add support for milking cows
+        if (entity instanceof EntityCow && isEmpty(stack))
+        {
+            if (!player.worldObj.isRemote)
+                return true;
+            Fluid fluid = FluidRegistry.getFluid("milk");
+            if (fluid != null)
+            {
+                ItemStack newBucket = new ItemStack(this);
+                fill(newBucket, new FluidStack(fluid, FluidContainerRegistry.BUCKET_VOLUME), true);
+                player.inventory.setInventorySlotContents(player.inventory.currentItem, consumeBucket(new ItemStack(this), player, newBucket));
+                player.inventoryContainer.detectAndSendChanges();
+            }
+            else
+            {
+                ((EntityCow) entity).playLivingSound();
+                player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal(getUnlocalizedName() + ".error.fluid.milk.notRegistered")));
+            }
+            return true;
+        }
         return false;
     }
 
@@ -472,9 +529,16 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     {
         list.add(new ItemStack(item));
 
-        ItemStack stack1 = new ItemStack(item);
-        fill(stack1, new FluidStack(FluidRegistry.WATER, FluidContainerRegistry.BUCKET_VOLUME), true);
-        list.add(stack1);
+        ItemStack waterBucket = new ItemStack(item);
+        fill(waterBucket, new FluidStack(FluidRegistry.WATER, FluidContainerRegistry.BUCKET_VOLUME), true);
+        list.add(waterBucket);
+
+        if (FluidRegistry.getFluid("milk") != null)
+        {
+            ItemStack milkBucket = new ItemStack(item);
+            fill(milkBucket, new FluidStack(FluidRegistry.getFluid("milk"), FluidContainerRegistry.BUCKET_VOLUME), true);
+            list.add(milkBucket);
+        }
     }
 
     @Override
