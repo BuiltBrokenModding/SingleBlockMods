@@ -1,5 +1,6 @@
 package com.builtbroken.coloredchests.chests;
 
+import com.builtbroken.coloredchests.ColoredChests;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -15,6 +16,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -23,7 +25,10 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
+import java.awt.*;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import static net.minecraftforge.common.util.ForgeDirection.DOWN;
@@ -34,15 +39,29 @@ import static net.minecraftforge.common.util.ForgeDirection.DOWN;
 public class BlockChest extends BlockContainer
 {
     private final Random random = new Random();
-    public final int checkType;
+
+    //"black", "red", "green", "brown", "blue", "purple", "cyan", "silver", "gray", "pink", "lime", "yellow", "light_blue", "magenta", "orange", "white"
+    public static Color[] defaultColors = new Color[]{Color.BLACK, Color.RED, Color.GREEN, new Color(102, 51, 0), Color.BLUE, new Color(170, 0, 170), Color.CYAN, new Color(224, 224, 224), Color.GRAY, Color.PINK, new Color(128, 255, 0), Color.YELLOW, new Color(51, 255, 255), Color.MAGENTA, Color.ORANGE, Color.WHITE};
 
     public BlockChest()
     {
         super(Material.wood);
-        this.checkType = 0;
         this.setBlockName("coloredChest");
         this.setCreativeTab(CreativeTabs.tabDecorations);
         this.setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.875F, 0.9375F);
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public void getSubBlocks(Item item, CreativeTabs tab, List items)
+    {
+        for (int i = 0; i < defaultColors.length; i++)
+        {
+            ItemStack stack = new ItemStack(item);
+            stack.setTagCompound(new NBTTagCompound());
+            stack.getTagCompound().setInteger("rgb", ColoredChests.getIntFromColor(defaultColors[i]));
+            items.add(stack);
+        }
     }
 
     @Override
@@ -60,7 +79,7 @@ public class BlockChest extends BlockContainer
     @Override
     public int getRenderType()
     {
-        return 22;
+        return -1;
     }
 
     @Override
@@ -186,7 +205,11 @@ public class BlockChest extends BlockContainer
 
         if (stack.hasDisplayName())
         {
-            ((TileChest) world.getTileEntity(x, y, z)).func_145976_a(stack.getDisplayName());
+            ((TileChest) world.getTileEntity(x, y, z)).setCustomName(stack.getDisplayName());
+        }
+        if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
+        {
+            ((TileChest) world.getTileEntity(x, y, z)).color = new Color(stack.getTagCompound().getInteger("rgb"));
         }
     }
 
@@ -351,16 +374,18 @@ public class BlockChest extends BlockContainer
         }
     }
 
+    Color colorTempCache;
+
     @Override
     public void breakBlock(World world, int x, int y, int z, Block block, int meta)
     {
-        TileChest TileChest = (TileChest) world.getTileEntity(x, y, z);
+        TileChest tile = (TileChest) world.getTileEntity(x, y, z);
 
-        if (TileChest != null)
+        if (tile != null)
         {
-            for (int i1 = 0; i1 < TileChest.getSizeInventory(); ++i1)
+            for (int i1 = 0; i1 < tile.getSizeInventory(); ++i1)
             {
-                ItemStack itemstack = TileChest.getStackInSlot(i1);
+                ItemStack itemstack = tile.getStackInSlot(i1);
 
                 if (itemstack != null)
                 {
@@ -392,10 +417,24 @@ public class BlockChest extends BlockContainer
                 }
             }
 
+            colorTempCache = tile.color;
             world.func_147453_f(x, y, z, block);
         }
 
         super.breakBlock(world, x, y, z, block, meta);
+    }
+
+    @Override
+    public ArrayList<ItemStack> getDrops(World world, int x, int y, int z, int metadata, int fortune)
+    {
+        ArrayList<ItemStack> ret = new ArrayList<ItemStack>();
+        ret.add(new ItemStack(this, 1, damageDropped(metadata)));
+        if (colorTempCache != null)
+        {
+            ret.get(0).setTagCompound(new NBTTagCompound());
+            ret.get(0).getTagCompound().setInteger("rgb", ColoredChests.getIntFromColor(colorTempCache));
+        }
+        return ret;
     }
 
     @Override
@@ -482,32 +521,6 @@ public class BlockChest extends BlockContainer
         return new TileChest();
     }
 
-    @Override
-    public boolean canProvidePower()
-    {
-        return this.checkType == 1;
-    }
-
-    @Override
-    public int isProvidingWeakPower(IBlockAccess world, int x, int y, int z, int side)
-    {
-        if (!this.canProvidePower())
-        {
-            return 0;
-        }
-        else
-        {
-            int i1 = ((TileChest) world.getTileEntity(x, y, z)).numPlayersUsing;
-            return MathHelper.clamp_int(i1, 0, 15);
-        }
-    }
-
-    @Override
-    public int isProvidingStrongPower(IBlockAccess world, int x, int y, int z, int side)
-    {
-        return side == 1 ? this.isProvidingWeakPower(world, x, y, z, side) : 0;
-    }
-
     private static boolean isOcelotSittingOnBlock(World world, int x, int y, int z)
     {
         Iterator iterator = world.getEntitiesWithinAABB(EntityOcelot.class, AxisAlignedBB.getBoundingBox((double) x, (double) (y + 1), (double) z, (double) (x + 1), (double) (y + 2), (double) (z + 1))).iterator();
@@ -540,7 +553,8 @@ public class BlockChest extends BlockContainer
         return Container.calcRedstoneFromInventory(this.getCombinedInventory(world, x, y, z));
     }
 
-    @Override @SideOnly(Side.CLIENT)
+    @Override
+    @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister reg)
     {
         this.blockIcon = reg.registerIcon("planks_oak");

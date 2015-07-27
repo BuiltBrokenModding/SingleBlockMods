@@ -1,13 +1,14 @@
 package com.builtbroken.coloredchests.chests;
 
-import net.minecraft.block.Block;
+import com.builtbroken.coloredchests.ColoredChests;
+import com.builtbroken.coloredchests.network.PacketChest;
+import com.builtbroken.coloredchests.network.PacketManager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.Packet;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 
@@ -18,9 +19,9 @@ import java.util.List;
 /**
  * Created by Dark on 7/26/2015.
  */
-public class TileChest extends TileEntity implements IInventory
+public class TileChest extends TileInv
 {
-    private ItemStack[] chestContents = new ItemStack[36];
+    //TODO have custom name render on outside of chest
     /** Determines if the check for adjacent chests has taken place. */
     public boolean adjacentChestChecked;
     /** Contains the chest tile located adjacent to this one (if any) */
@@ -37,84 +38,12 @@ public class TileChest extends TileEntity implements IInventory
     public float prevLidAngle;
     /** The number of players currently using this chest */
     public int numPlayersUsing;
+    public Color color;
+
     /** Server sync counter (once per 20 ticks) */
     private int ticksSinceSync;
-    private int cachedChestType;
-    private Color color;
-    private String customName;
+    public String customName = "";
 
-    @Override
-    public int getSizeInventory()
-    {
-        return 27;
-    }
-
-    @Override
-    public ItemStack getStackInSlot(int p_70301_1_)
-    {
-        return this.chestContents[p_70301_1_];
-    }
-
-    @Override
-    public ItemStack decrStackSize(int p_70298_1_, int p_70298_2_)
-    {
-        if (this.chestContents[p_70298_1_] != null)
-        {
-            ItemStack itemstack;
-
-            if (this.chestContents[p_70298_1_].stackSize <= p_70298_2_)
-            {
-                itemstack = this.chestContents[p_70298_1_];
-                this.chestContents[p_70298_1_] = null;
-                this.markDirty();
-                return itemstack;
-            }
-            else
-            {
-                itemstack = this.chestContents[p_70298_1_].splitStack(p_70298_2_);
-
-                if (this.chestContents[p_70298_1_].stackSize == 0)
-                {
-                    this.chestContents[p_70298_1_] = null;
-                }
-
-                this.markDirty();
-                return itemstack;
-            }
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    @Override
-    public ItemStack getStackInSlotOnClosing(int p_70304_1_)
-    {
-        if (this.chestContents[p_70304_1_] != null)
-        {
-            ItemStack itemstack = this.chestContents[p_70304_1_];
-            this.chestContents[p_70304_1_] = null;
-            return itemstack;
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    @Override
-    public void setInventorySlotContents(int p_70299_1_, ItemStack p_70299_2_)
-    {
-        this.chestContents[p_70299_1_] = p_70299_2_;
-
-        if (p_70299_2_ != null && p_70299_2_.stackSize > this.getInventoryStackLimit())
-        {
-            p_70299_2_.stackSize = this.getInventoryStackLimit();
-        }
-
-        this.markDirty();
-    }
 
     @Override
     public String getInventoryName()
@@ -128,70 +57,52 @@ public class TileChest extends TileEntity implements IInventory
         return this.customName != null && this.customName.length() > 0;
     }
 
-    public void func_145976_a(String p_145976_1_)
+    public void setCustomName(String name)
     {
-        this.customName = p_145976_1_;
+        this.customName = name;
+        if (!worldObj.isRemote)
+            PacketManager.sendToAllAround(new PacketChest(this, PacketChest.ChestPacketType.NAME), this);
+    }
+
+    public void setColor(Color color)
+    {
+        this.color = color;
+        if (!worldObj.isRemote)
+            PacketManager.sendToAllAround(new PacketChest(this, PacketChest.ChestPacketType.COLOR), this);
     }
 
     @Override
-    public void readFromNBT(NBTTagCompound p_145839_1_)
+    public Packet getDescriptionPacket()
     {
-        super.readFromNBT(p_145839_1_);
-        NBTTagList nbttaglist = p_145839_1_.getTagList("Items", 10);
-        this.chestContents = new ItemStack[this.getSizeInventory()];
+        return PacketManager.toMcPacket(new PacketChest(this, PacketChest.ChestPacketType.DESC));
+    }
 
-        if (p_145839_1_.hasKey("CustomName", 8))
+    @Override
+    public void readFromNBT(NBTTagCompound nbt)
+    {
+        super.readFromNBT(nbt);
+        if (nbt.hasKey("CustomName", 8))
         {
-            this.customName = p_145839_1_.getString("CustomName");
+            this.customName = nbt.getString("CustomName");
         }
-
-        for (int i = 0; i < nbttaglist.tagCount(); ++i)
+        if (nbt.hasKey("rgb"))
         {
-            NBTTagCompound nbttagcompound1 = nbttaglist.getCompoundTagAt(i);
-            int j = nbttagcompound1.getByte("Slot") & 255;
-
-            if (j >= 0 && j < this.chestContents.length)
-            {
-                this.chestContents[j] = ItemStack.loadItemStackFromNBT(nbttagcompound1);
-            }
+            this.color = new Color(nbt.getInteger("rgb"));
         }
     }
 
     @Override
-    public void writeToNBT(NBTTagCompound p_145841_1_)
+    public void writeToNBT(NBTTagCompound nbt)
     {
-        super.writeToNBT(p_145841_1_);
-        NBTTagList nbttaglist = new NBTTagList();
-
-        for (int i = 0; i < this.chestContents.length; ++i)
-        {
-            if (this.chestContents[i] != null)
-            {
-                NBTTagCompound nbttagcompound1 = new NBTTagCompound();
-                nbttagcompound1.setByte("Slot", (byte)i);
-                this.chestContents[i].writeToNBT(nbttagcompound1);
-                nbttaglist.appendTag(nbttagcompound1);
-            }
-        }
-
-        p_145841_1_.setTag("Items", nbttaglist);
-
+        super.writeToNBT(nbt);
         if (this.hasCustomInventoryName())
         {
-            p_145841_1_.setString("CustomName", this.customName);
+            nbt.setString("CustomName", this.customName);
         }
-    }
-
-    @Override
-    public int getInventoryStackLimit()
-    {
-        return 64;
-    }
-
-    @Override
-    public boolean isUseableByPlayer(EntityPlayer p_70300_1_)
-    {
-        return this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord) != this ? false : p_70300_1_.getDistanceSq((double)this.xCoord + 0.5D, (double)this.yCoord + 0.5D, (double)this.zCoord + 0.5D) <= 64.0D;
+        if (color != null)
+        {
+            nbt.setInteger("rgb", ColoredChests.getIntFromColor(color));
+        }
     }
 
     @Override
@@ -201,39 +112,39 @@ public class TileChest extends TileEntity implements IInventory
         this.adjacentChestChecked = false;
     }
 
-    private void func_145978_a(TileChest p_145978_1_, int p_145978_2_)
+    private void checkAdjacentChest(TileChest tile, int side)
     {
-        if (p_145978_1_.isInvalid())
+        if (tile.isInvalid())
         {
             this.adjacentChestChecked = false;
         }
         else if (this.adjacentChestChecked)
         {
-            switch (p_145978_2_)
+            switch (side)
             {
                 case 0:
-                    if (this.adjacentChestZPos != p_145978_1_)
+                    if (this.adjacentChestZPos != tile)
                     {
                         this.adjacentChestChecked = false;
                     }
 
                     break;
                 case 1:
-                    if (this.adjacentChestXNeg != p_145978_1_)
+                    if (this.adjacentChestXNeg != tile)
                     {
                         this.adjacentChestChecked = false;
                     }
 
                     break;
                 case 2:
-                    if (this.adjacentChestZNeg != p_145978_1_)
+                    if (this.adjacentChestZNeg != tile)
                     {
                         this.adjacentChestChecked = false;
                     }
 
                     break;
                 case 3:
-                    if (this.adjacentChestXPos != p_145978_1_)
+                    if (this.adjacentChestXPos != tile)
                     {
                         this.adjacentChestChecked = false;
                     }
@@ -256,42 +167,42 @@ public class TileChest extends TileEntity implements IInventory
 
             if (this.canConnectToBlock(this.xCoord - 1, this.yCoord, this.zCoord))
             {
-                this.adjacentChestXNeg = (TileChest)this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord);
+                this.adjacentChestXNeg = (TileChest) this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord);
             }
 
             if (this.canConnectToBlock(this.xCoord + 1, this.yCoord, this.zCoord))
             {
-                this.adjacentChestXPos = (TileChest)this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord);
+                this.adjacentChestXPos = (TileChest) this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord);
             }
 
             if (this.canConnectToBlock(this.xCoord, this.yCoord, this.zCoord - 1))
             {
-                this.adjacentChestZNeg = (TileChest)this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1);
+                this.adjacentChestZNeg = (TileChest) this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1);
             }
 
             if (this.canConnectToBlock(this.xCoord, this.yCoord, this.zCoord + 1))
             {
-                this.adjacentChestZPos = (TileChest)this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1);
+                this.adjacentChestZPos = (TileChest) this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1);
             }
 
             if (this.adjacentChestZNeg != null)
             {
-                this.adjacentChestZNeg.func_145978_a(this, 0);
+                this.adjacentChestZNeg.checkAdjacentChest(this, 0);
             }
 
             if (this.adjacentChestZPos != null)
             {
-                this.adjacentChestZPos.func_145978_a(this, 2);
+                this.adjacentChestZPos.checkAdjacentChest(this, 2);
             }
 
             if (this.adjacentChestXPos != null)
             {
-                this.adjacentChestXPos.func_145978_a(this, 1);
+                this.adjacentChestXPos.checkAdjacentChest(this, 1);
             }
 
             if (this.adjacentChestXNeg != null)
             {
-                this.adjacentChestXNeg.func_145978_a(this, 3);
+                this.adjacentChestXNeg.checkAdjacentChest(this, 3);
             }
         }
     }
@@ -300,9 +211,8 @@ public class TileChest extends TileEntity implements IInventory
     {
         if (this.worldObj != null)
         {
-            Block block = this.worldObj.getBlock(x, y, z);
             TileEntity tile = this.worldObj.getTileEntity(x, y, z);
-            return block instanceof BlockChest && tile instanceof TileChest && ((BlockChest)block).checkType == this.func_145980_j() && ((TileChest) tile).color == color;
+            return tile instanceof TileChest && ((TileChest) tile).color == color;
         }
         return false;
     }
@@ -324,13 +234,13 @@ public class TileChest extends TileEntity implements IInventory
 
             while (iterator.hasNext())
             {
-                EntityPlayer entityplayer = (EntityPlayer)iterator.next();
+                EntityPlayer entityplayer = (EntityPlayer) iterator.next();
 
                 if (entityplayer.openContainer instanceof ContainerChest)
                 {
-                    IInventory iinventory = ((ContainerChest)entityplayer.openContainer).getLowerChestInventory();
+                    IInventory iinventory = ((ContainerChest) entityplayer.openContainer).getLowerChestInventory();
 
-                    if (iinventory == this || iinventory instanceof InventoryLargeChest && ((InventoryLargeChest)iinventory).isPartOfLargeChest(this))
+                    if (iinventory == this || iinventory instanceof InventoryLargeChest && ((InventoryLargeChest) iinventory).isPartOfLargeChest(this))
                     {
                         ++this.numPlayersUsing;
                     }
@@ -344,8 +254,8 @@ public class TileChest extends TileEntity implements IInventory
 
         if (this.numPlayersUsing > 0 && this.lidAngle == 0.0F && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null)
         {
-            double d1 = (double)this.xCoord + 0.5D;
-            d2 = (double)this.zCoord + 0.5D;
+            double d1 = (double) this.xCoord + 0.5D;
+            d2 = (double) this.zCoord + 0.5D;
 
             if (this.adjacentChestZPos != null)
             {
@@ -357,7 +267,7 @@ public class TileChest extends TileEntity implements IInventory
                 d1 += 0.5D;
             }
 
-            this.worldObj.playSoundEffect(d1, (double)this.yCoord + 0.5D, d2, "random.chestopen", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+            this.worldObj.playSoundEffect(d1, (double) this.yCoord + 0.5D, d2, "random.chestopen", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
         }
 
         if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F)
@@ -382,8 +292,8 @@ public class TileChest extends TileEntity implements IInventory
 
             if (this.lidAngle < f2 && f1 >= f2 && this.adjacentChestZNeg == null && this.adjacentChestXNeg == null)
             {
-                d2 = (double)this.xCoord + 0.5D;
-                double d0 = (double)this.zCoord + 0.5D;
+                d2 = (double) this.xCoord + 0.5D;
+                double d0 = (double) this.zCoord + 0.5D;
 
                 if (this.adjacentChestZPos != null)
                 {
@@ -395,7 +305,7 @@ public class TileChest extends TileEntity implements IInventory
                     d2 += 0.5D;
                 }
 
-                this.worldObj.playSoundEffect(d2, (double)this.yCoord + 0.5D, d0, "random.chestclosed", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+                this.worldObj.playSoundEffect(d2, (double) this.yCoord + 0.5D, d0, "random.chestclosed", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
             }
 
             if (this.lidAngle < 0.0F)
@@ -446,30 +356,10 @@ public class TileChest extends TileEntity implements IInventory
     }
 
     @Override
-    public boolean isItemValidForSlot(int p_94041_1_, ItemStack p_94041_2_)
-    {
-        return true;
-    }
-
-    @Override
     public void invalidate()
     {
         super.invalidate();
         this.updateContainingBlockInfo();
         this.checkForAdjacentChests();
-    }
-
-    public int func_145980_j()
-    {
-        if (this.cachedChestType == -1)
-        {
-            if (this.worldObj == null || !(this.getBlockType() instanceof BlockChest))
-            {
-                return 0;
-            }
-            this.cachedChestType = ((BlockChest)this.getBlockType()).checkType;
-        }
-
-        return this.cachedChestType;
     }
 }
