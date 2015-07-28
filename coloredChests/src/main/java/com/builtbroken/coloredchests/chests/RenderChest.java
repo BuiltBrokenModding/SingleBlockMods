@@ -36,7 +36,7 @@ public class RenderChest extends TileEntitySpecialRenderer
 
             if (block instanceof BlockChest && i == 0)
             {
-                ((BlockChest) block).func_149954_e(tile.getWorldObj(), tile.xCoord, tile.yCoord, tile.zCoord);
+                ((BlockChest) block).attemptToConnectToChest(tile.getWorldObj(), tile.xCoord, tile.yCoord, tile.zCoord);
                 i = tile.worldObj.getBlockMetadata(tile.xCoord, tile.yCoord, tile.zCoord);
             }
 

@@ -28,6 +28,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.ForgeDirection;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -91,19 +92,28 @@ public class BlockChest extends BlockContainer
     @Override
     public void setBlockBoundsBasedOnState(IBlockAccess world, int x, int y, int z)
     {
-        if (world.getBlock(x, y, z - 1) == this)
+        Color color = null;
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile instanceof TileChest)
+            color = ((TileChest) tile).color;
+        boolean block = isMatchingChest(world, x, y, z - 1, color);
+        boolean block1 = isMatchingChest(world, x, y, z + 1, color);
+        boolean block2 = isMatchingChest(world, x - 1, y, z, color);
+        boolean block3 = isMatchingChest(world, x + 1, y, z, color);
+
+        if (block)
         {
             this.setBlockBounds(0.0625F, 0.0F, 0.0F, 0.9375F, 0.875F, 0.9375F);
         }
-        else if (world.getBlock(x, y, z + 1) == this)
+        else if (block1)
         {
             this.setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.875F, 1.0F);
         }
-        else if (world.getBlock(x - 1, y, z) == this)
+        else if (block2)
         {
             this.setBlockBounds(0.0F, 0.0F, 0.0625F, 0.9375F, 0.875F, 0.9375F);
         }
-        else if (world.getBlock(x + 1, y, z) == this)
+        else if (block3)
         {
             this.setBlockBounds(0.0625F, 0.0F, 0.0625F, 1.0F, 0.875F, 0.9375F);
         }
@@ -117,72 +127,70 @@ public class BlockChest extends BlockContainer
     public void onBlockAdded(World world, int x, int y, int z)
     {
         super.onBlockAdded(world, x, y, z);
-        this.func_149954_e(world, x, y, z);
-        Block block = world.getBlock(x, y, z - 1);
-        Block block1 = world.getBlock(x, y, z + 1);
-        Block block2 = world.getBlock(x - 1, y, z);
-        Block block3 = world.getBlock(x + 1, y, z);
-
-        if (block == this)
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile instanceof TileChest)
         {
-            this.func_149954_e(world, x, y, z - 1);
-        }
+            this.attemptToConnectToChest(world, x, y, z);
+            Color color = ((TileChest) tile).color;
 
-        if (block1 == this)
-        {
-            this.func_149954_e(world, x, y, z + 1);
-        }
-
-        if (block2 == this)
-        {
-            this.func_149954_e(world, x - 1, y, z);
-        }
-
-        if (block3 == this)
-        {
-            this.func_149954_e(world, x + 1, y, z);
+            for (int i = 2; i < ForgeDirection.VALID_DIRECTIONS.length; i++)
+            {
+                ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[i];
+                if (isMatchingChest(world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ, color))
+                {
+                    this.attemptToConnectToChest(world, x + dir.offsetX, y + dir.offsetY, z + dir.offsetZ);
+                }
+            }
         }
     }
 
     @Override
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack)
     {
-        Block block = world.getBlock(x, y, z - 1);
-        Block block1 = world.getBlock(x, y, z + 1);
-        Block block2 = world.getBlock(x - 1, y, z);
-        Block block3 = world.getBlock(x + 1, y, z);
+        Color color = null;
+        if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
+        {
+            color = ColoredChests.getColor(stack.getTagCompound().getInteger("rgb"));
+            ((TileChest) world.getTileEntity(x, y, z)).color = color;
+        }
+        boolean block = isMatchingChest(world, x, y, z - 1, color);
+        boolean block1 = isMatchingChest(world, x, y, z + 1, color);
+        boolean block2 = isMatchingChest(world, x - 1, y, z, color);
+        boolean block3 = isMatchingChest(world, x + 1, y, z, color);
         byte b0 = 0;
-        int l = MathHelper.floor_double((double) (entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
+        int facingDirection = MathHelper.floor_double((double) (entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
 
-        if (l == 0)
+
+        if (facingDirection == 0)
         {
             b0 = 2;
         }
 
-        if (l == 1)
+        if (facingDirection == 1)
         {
             b0 = 5;
         }
 
-        if (l == 2)
+        if (facingDirection == 2)
         {
             b0 = 3;
         }
 
-        if (l == 3)
+        if (facingDirection == 3)
         {
             b0 = 4;
         }
 
-        if (block != this && block1 != this && block2 != this && block3 != this)
+        if (block && block1 && block2 && block3)
         {
             world.setBlockMetadataWithNotify(x, y, z, b0, 3);
         }
         else
         {
-            if ((block == this || block1 == this) && (b0 == 4 || b0 == 5))
+            //Force the chest next to us to face the same direction
+            if ((block || block1) && (b0 == 4 || b0 == 5))
             {
-                if (block == this)
+                if (block)
                 {
                     world.setBlockMetadataWithNotify(x, y, z - 1, b0, 3);
                 }
@@ -194,9 +202,9 @@ public class BlockChest extends BlockContainer
                 world.setBlockMetadataWithNotify(x, y, z, b0, 3);
             }
 
-            if ((block2 == this || block3 == this) && (b0 == 2 || b0 == 3))
+            if ((block2 || block3) && (b0 == 2 || b0 == 3))
             {
-                if (block2 == this)
+                if (block2)
                 {
                     world.setBlockMetadataWithNotify(x - 1, y, z, b0, 3);
                 }
@@ -213,12 +221,17 @@ public class BlockChest extends BlockContainer
         {
             ((TileChest) world.getTileEntity(x, y, z)).setCustomName(stack.getDisplayName());
         }
-        if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
-            ((TileChest) world.getTileEntity(x, y, z)).color = ColoredChests.getColor(stack.getTagCompound().getInteger("rgb"));
+    }
+
+    public boolean isMatchingChest(IBlockAccess world, int x, int y, int z, Color color)
+    {
+        Block block = world.getBlock(x, y, z);
+        TileEntity tile = world.getTileEntity(x, y, z);
+        return block == this && tile instanceof TileChest && color == ((TileChest) tile).color;
     }
 
 
-    public void func_149954_e(World world, int x, int y, int z)
+    public void attemptToConnectToChest(World world, int x, int y, int z)
     {
         if (!world.isRemote)
         {
@@ -336,46 +349,32 @@ public class BlockChest extends BlockContainer
     @Override
     public boolean canPlaceBlockAt(World world, int x, int y, int z)
     {
-        int l = 0;
-
-        //TODO recode to allow colored chest to be placed next to each other, may need to be done in the ItemBlock
-        if (world.getBlock(x - 1, y, z) == this)
+        //Checks if the block can be placed by checking if a double chest already exists next to the location
+        for (int i = 2; i < ForgeDirection.VALID_DIRECTIONS.length; i++)
         {
-            ++l;
+            ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[i];
+            TileEntity tile = world.getTileEntity(dir.offsetX + x, dir.offsetY + y, dir.offsetZ + z);
+            if (world.getBlock(dir.offsetX + x, dir.offsetY + y, dir.offsetZ + z) == this && tile instanceof TileChest)
+            {
+                Color color = ((TileChest) tile).color;
+                if (isMatchingChest(world, x, y, z - 1, color) || isMatchingChest(world, x, y, z + 1, color) || isMatchingChest(world, x - 1, y, z, color) || isMatchingChest(world, x + 1, y, z, color))
+                {
+                    return false;
+                }
+            }
         }
-
-        if (world.getBlock(x + 1, y, z) == this)
-        {
-            ++l;
-        }
-
-        if (world.getBlock(x, y, z - 1) == this)
-        {
-            ++l;
-        }
-
-        if (world.getBlock(x, y, z + 1) == this)
-        {
-            ++l;
-        }
-
-        return l > 1 ? false : (this.hasConnectedChest(world, x - 1, y, z) ? false : (this.hasConnectedChest(world, x + 1, y, z) ? false : (this.hasConnectedChest(world, x, y, z - 1) ? false : !this.hasConnectedChest(world, x, y, z + 1))));
-    }
-
-    private boolean hasConnectedChest(World world, int x, int y, int z)
-    {
-        return world.getBlock(x, y, z) != this ? false : (world.getBlock(x - 1, y, z) == this ? true : (world.getBlock(x + 1, y, z) == this ? true : (world.getBlock(x, y, z - 1) == this ? true : world.getBlock(x, y, z + 1) == this)));
+        return true;
     }
 
     @Override
     public void onNeighborBlockChange(World world, int x, int y, int z, Block block)
     {
         super.onNeighborBlockChange(world, x, y, z, block);
-        TileChest TileChest = (TileChest) world.getTileEntity(x, y, z);
+        TileChest chest = (TileChest) world.getTileEntity(x, y, z);
 
-        if (TileChest != null)
+        if (chest != null)
         {
-            TileChest.updateContainingBlockInfo();
+            chest.updateContainingBlockInfo();
         }
     }
 
@@ -464,60 +463,65 @@ public class BlockChest extends BlockContainer
 
     public IInventory getCombinedInventory(World world, int x, int y, int z)
     {
-        Object object = world.getTileEntity(x, y, z);
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile instanceof TileChest)
+        {
+            Color color = ((TileChest) tile).color;
+            boolean negZChest = isMatchingChest(world, x, y, z - 1, color);
+            boolean posZChest = isMatchingChest(world, x, y, z + 1, color);
+            boolean negXChest = isMatchingChest(world, x - 1, y, z, color);
+            boolean posXChest = isMatchingChest(world, x + 1, y, z, color);
 
-        if (object == null)
-        {
-            return null;
-        }
-        else if (world.isSideSolid(x, y + 1, z, DOWN))
-        {
-            return null;
-        }
-        else if (isOcelotSittingOnBlock(world, x, y, z))
-        {
-            return null;
-        }
-        else if (world.getBlock(x - 1, y, z) == this && (world.isSideSolid(x - 1, y + 1, z, DOWN) || isOcelotSittingOnBlock(world, x - 1, y, z)))
-        {
-            return null;
-        }
-        else if (world.getBlock(x + 1, y, z) == this && (world.isSideSolid(x + 1, y + 1, z, DOWN) || isOcelotSittingOnBlock(world, x + 1, y, z)))
-        {
-            return null;
-        }
-        else if (world.getBlock(x, y, z - 1) == this && (world.isSideSolid(x, y + 1, z - 1, DOWN) || isOcelotSittingOnBlock(world, x, y, z - 1)))
-        {
-            return null;
-        }
-        else if (world.getBlock(x, y, z + 1) == this && (world.isSideSolid(x, y + 1, z + 1, DOWN) || isOcelotSittingOnBlock(world, x, y, z + 1)))
-        {
-            return null;
-        }
-        else
-        {
-            if (world.getBlock(x - 1, y, z) == this)
+
+            if (world.isSideSolid(x, y + 1, z, DOWN))
             {
-                object = new InventoryLargeChest("container.chestDouble", (TileChest) world.getTileEntity(x - 1, y, z), (IInventory) object);
+                return null;
             }
-
-            if (world.getBlock(x + 1, y, z) == this)
+            else if (isOcelotSittingOnBlock(world, x, y, z))
             {
-                object = new InventoryLargeChest("container.chestDouble", (IInventory) object, (TileChest) world.getTileEntity(x + 1, y, z));
+                return null;
             }
-
-            if (world.getBlock(x, y, z - 1) == this)
+            else if (negXChest && (world.isSideSolid(x - 1, y + 1, z, DOWN) || isOcelotSittingOnBlock(world, x - 1, y, z)))
             {
-                object = new InventoryLargeChest("container.chestDouble", (TileChest) world.getTileEntity(x, y, z - 1), (IInventory) object);
+                return null;
             }
-
-            if (world.getBlock(x, y, z + 1) == this)
+            else if (posXChest && (world.isSideSolid(x + 1, y + 1, z, DOWN) || isOcelotSittingOnBlock(world, x + 1, y, z)))
             {
-                object = new InventoryLargeChest("container.chestDouble", (IInventory) object, (TileChest) world.getTileEntity(x, y, z + 1));
+                return null;
             }
+            else if (negZChest && (world.isSideSolid(x, y + 1, z - 1, DOWN) || isOcelotSittingOnBlock(world, x, y, z - 1)))
+            {
+                return null;
+            }
+            else if (posZChest && (world.isSideSolid(x, y + 1, z + 1, DOWN) || isOcelotSittingOnBlock(world, x, y, z + 1)))
+            {
+                return null;
+            }
+            else
+            {
+                if (negXChest)
+                {
+                    return new InventoryLargeChest("container.chestDouble", (TileChest) world.getTileEntity(x - 1, y, z), (IInventory) tile);
+                }
 
-            return (IInventory) object;
+                if (posXChest)
+                {
+                    return new InventoryLargeChest("container.chestDouble", (IInventory) tile, (TileChest) world.getTileEntity(x + 1, y, z));
+                }
+
+                if (negZChest)
+                {
+                    return new InventoryLargeChest("container.chestDouble", (TileChest) world.getTileEntity(x, y, z - 1), (IInventory) tile);
+                }
+
+                if (posZChest)
+                {
+                    return new InventoryLargeChest("container.chestDouble", (IInventory) tile, (TileChest) world.getTileEntity(x, y, z + 1));
+                }
+                return (IInventory) tile;
+            }
         }
+        return null;
     }
 
     @Override
