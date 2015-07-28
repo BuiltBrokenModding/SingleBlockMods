@@ -11,12 +11,15 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
-import net.minecraftforge.common.config.Configuration;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemDye;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
-import java.io.File;
 
 /**
  * Created by Dark on 7/25/2015.
@@ -38,16 +41,10 @@ public class ColoredChests
     public void preInit(FMLPreInitializationEvent event)
     {
         LOGGER = LogManager.getLogger("ColoredChests");
-        Configuration config = new Configuration(new File(event.getModConfigurationDirectory(), "bbm/Colored_Chests.cfg"));
-        config.load();
-
-
-        config.save();
-        proxy.preInit();
-
         blockChest = new BlockChest();
         GameRegistry.registerBlock(blockChest, ItemBlockChest.class, "coloredChest");
         GameRegistry.registerTileEntity(TileChest.class, "coloredChest");
+        proxy.preInit();
     }
 
     @Mod.EventHandler
@@ -60,6 +57,28 @@ public class ColoredChests
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event)
     {
+        //TODO add ore dictionary support
+        for (int i = 0; i < ItemDye.field_150922_c.length; i++)
+        {
+            ItemStack stack = new ItemStack(blockChest);
+            stack.setTagCompound(new NBTTagCompound());
+            stack.getTagCompound().setInteger("rgb", ItemDye.field_150922_c[i]);
+            stack.getTagCompound().setString("colorName", ItemDye.field_150921_b[i]);
+
+            GameRegistry.addShapedRecipe(stack, "d", "c", 'd', new ItemStack(Items.dye, 1, i), 'c', Blocks.chest);
+            for (int b = 0; b < ItemDye.field_150922_c.length; b++)
+            {
+                if (b != i)
+                {
+                    ItemStack stack2 = new ItemStack(blockChest);
+                    stack2.setTagCompound(new NBTTagCompound());
+                    stack2.getTagCompound().setInteger("rgb", ItemDye.field_150922_c[b]);
+                    stack2.getTagCompound().setString("colorName", ItemDye.field_150921_b[b]);
+                    GameRegistry.addShapedRecipe(stack, "d", "c", 'd', new ItemStack(Items.dye, 1, i), 'c', stack2);
+                }
+            }
+        }
+        GameRegistry.addShapelessRecipe(new ItemStack(Blocks.chest), blockChest);
         proxy.postInit();
     }
 

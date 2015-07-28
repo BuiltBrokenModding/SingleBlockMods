@@ -502,7 +502,6 @@ public class BlockChest extends BlockContainer
         if (tile instanceof TileChest)
         {
             Color color = ((TileChest) tile).color;
-            System.out.println("Opening colored chest with color " + color);
             boolean negZChest = isMatchingChest(world, x, y, z - 1, color);
             boolean posZChest = isMatchingChest(world, x, y, z + 1, color);
             boolean negXChest = isMatchingChest(world, x - 1, y, z, color);
