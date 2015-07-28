@@ -181,7 +181,7 @@ public class BlockChest extends BlockContainer
             b0 = 4;
         }
 
-        if (block && block1 && block2 && block3)
+        if (!block && !block1 && !block2 && !block3)
         {
             world.setBlockMetadataWithNotify(x, y, z, b0, 3);
         }
@@ -350,6 +350,16 @@ public class BlockChest extends BlockContainer
     public boolean canPlaceBlockAt(World world, int x, int y, int z)
     {
         //Checks if the block can be placed by checking if a double chest already exists next to the location
+
+        return true;
+    }
+
+    @Override
+    public boolean canReplace(World world, int x, int y, int z, int side, ItemStack stack)
+    {
+        Color stackColor = null;
+        if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
+            stackColor = ColoredChests.getColor(stack.getTagCompound().getInteger("rgb"));
         for (int i = 2; i < ForgeDirection.VALID_DIRECTIONS.length; i++)
         {
             ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[i];
@@ -357,9 +367,12 @@ public class BlockChest extends BlockContainer
             if (world.getBlock(dir.offsetX + x, dir.offsetY + y, dir.offsetZ + z) == this && tile instanceof TileChest)
             {
                 Color color = ((TileChest) tile).color;
-                if (isMatchingChest(world, x, y, z - 1, color) || isMatchingChest(world, x, y, z + 1, color) || isMatchingChest(world, x - 1, y, z, color) || isMatchingChest(world, x + 1, y, z, color))
+                if (color == stackColor)
                 {
-                    return false;
+                    if (isMatchingChest(world, x, y, z - 1, color) || isMatchingChest(world, x, y, z + 1, color) || isMatchingChest(world, x - 1, y, z, color) || isMatchingChest(world, x + 1, y, z, color))
+                    {
+                        return false;
+                    }
                 }
             }
         }
