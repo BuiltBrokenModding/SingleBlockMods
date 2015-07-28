@@ -61,9 +61,7 @@ public class RenderChest extends TileEntitySpecialRenderer
             GL11.glPushMatrix();
             GL11.glEnable(GL12.GL_RESCALE_NORMAL);
             if (tile.color != null)
-                GL11.glColor4f(tile.color.getRed(), tile.color.getGreen(), tile.color.getBlue(), 1.0F);
-            else
-                GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
+                GL11.glColor3b((byte) tile.color.getRed(), (byte) tile.color.getGreen(), (byte)tile.color.getBlue());
             GL11.glTranslatef((float) xx, (float) yy + 1.0F, (float) zz + 1.0F);
             GL11.glScalef(1.0F, -1.0F, -1.0F);
             GL11.glTranslatef(0.5F, 0.5F, 0.5F);

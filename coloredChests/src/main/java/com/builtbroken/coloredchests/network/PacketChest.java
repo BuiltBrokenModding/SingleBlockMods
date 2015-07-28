@@ -1,6 +1,5 @@
 package com.builtbroken.coloredchests.network;
 
-import com.builtbroken.coloredchests.ColoredChests;
 import com.builtbroken.coloredchests.chests.TileChest;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
@@ -54,10 +53,10 @@ public class PacketChest extends PacketTile
         switch (type)
         {
             case COLOR:
-                output.writeInt(ColoredChests.getIntFromColor(color));
+                output.writeInt(color.getRGB());
                 break;
             case DESC:
-                output.writeInt(ColoredChests.getIntFromColor(color));
+                output.writeInt(color.getRGB());
                 output.writeUTF(name);
                 break;
             case NAME:

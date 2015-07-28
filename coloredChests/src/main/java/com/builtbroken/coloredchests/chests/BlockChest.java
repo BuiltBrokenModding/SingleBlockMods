@@ -1,6 +1,5 @@
 package com.builtbroken.coloredchests.chests;
 
-import com.builtbroken.coloredchests.ColoredChests;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -17,6 +16,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -40,8 +40,6 @@ public class BlockChest extends BlockContainer
 {
     private final Random random = new Random();
 
-    //"black", "red", "green", "brown", "blue", "purple", "cyan", "silver", "gray", "pink", "lime", "yellow", "light_blue", "magenta", "orange", "white"
-    public static Color[] defaultColors = new Color[]{Color.BLACK, Color.RED, Color.GREEN, new Color(102, 51, 0), Color.BLUE, new Color(170, 0, 170), Color.CYAN, new Color(224, 224, 224), Color.GRAY, Color.PINK, new Color(128, 255, 0), Color.YELLOW, new Color(51, 255, 255), Color.MAGENTA, Color.ORANGE, Color.WHITE};
 
     public BlockChest()
     {
@@ -55,11 +53,11 @@ public class BlockChest extends BlockContainer
     @SideOnly(Side.CLIENT)
     public void getSubBlocks(Item item, CreativeTabs tab, List items)
     {
-        for (int i = 0; i < defaultColors.length; i++)
+        for (int i = 0; i < ItemDye.field_150922_c.length; i++)
         {
             ItemStack stack = new ItemStack(item);
             stack.setTagCompound(new NBTTagCompound());
-            stack.getTagCompound().setInteger("rgb", ColoredChests.getIntFromColor(defaultColors[i]));
+            stack.getTagCompound().setInteger("rgb", ItemDye.field_150922_c[i]);
             items.add(stack);
         }
     }
@@ -207,10 +205,7 @@ public class BlockChest extends BlockContainer
         {
             ((TileChest) world.getTileEntity(x, y, z)).setCustomName(stack.getDisplayName());
         }
-        if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
-        {
-            ((TileChest) world.getTileEntity(x, y, z)).color = new Color(stack.getTagCompound().getInteger("rgb"));
-        }
+        ((TileChest) world.getTileEntity(x, y, z)).color = new Color(stack.getItem().getColorFromItemStack(stack, 0));
     }
 
 
@@ -432,7 +427,7 @@ public class BlockChest extends BlockContainer
         if (colorTempCache != null)
         {
             ret.get(0).setTagCompound(new NBTTagCompound());
-            ret.get(0).getTagCompound().setInteger("rgb", ColoredChests.getIntFromColor(colorTempCache));
+            ret.get(0).getTagCompound().setInteger("rgb", colorTempCache.getRGB());
         }
         return ret;
     }

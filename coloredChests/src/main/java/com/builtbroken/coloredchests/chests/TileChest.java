@@ -1,6 +1,5 @@
 package com.builtbroken.coloredchests.chests;
 
-import com.builtbroken.coloredchests.ColoredChests;
 import com.builtbroken.coloredchests.network.PacketChest;
 import com.builtbroken.coloredchests.network.PacketManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,7 +37,7 @@ public class TileChest extends TileInv
     public float prevLidAngle;
     /** The number of players currently using this chest */
     public int numPlayersUsing;
-    public Color color;
+    public Color color = Color.WHITE;
 
     /** Server sync counter (once per 20 ticks) */
     private int ticksSinceSync;
@@ -101,7 +100,7 @@ public class TileChest extends TileInv
         }
         if (color != null)
         {
-            nbt.setInteger("rgb", ColoredChests.getIntFromColor(color));
+            nbt.setInteger("rgb", color.getRGB());
         }
     }
 

@@ -34,11 +34,12 @@ public class ItemChestRender implements IItemRenderer
         //GL11.glTranslatef(-0.5F, -0.5F, -0.5F);
         GL11.glScalef(1.0F, -1.0F, -1.0F);
         RenderChest.modelChest.chestLid.rotateAngleX = 0;
-        if (item.getTagCompound() != null && item.getTagCompound().hasKey("rgb"))
-        {
-            Color color = new Color(item.getTagCompound().getInteger("rgb"));
-            GL11.glColor4f(color.getRed(), color.getGreen(), color.getBlue(), 1.0f);
-        }
+
+        //set color
+        Color color = new Color(item.getItem().getColorFromItemStack(item, 0));
+        GL11.glColor3b((byte)color.getRed(), (byte)color.getGreen(), (byte)color.getBlue());
+
+
         FMLClientHandler.instance().getClient().renderEngine.bindTexture(RenderChest.textureChest);
         RenderChest.modelChest.renderAll();
         GL11.glEnable(GL12.GL_RESCALE_NORMAL);

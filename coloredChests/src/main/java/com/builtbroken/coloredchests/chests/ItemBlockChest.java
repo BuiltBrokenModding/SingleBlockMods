@@ -38,7 +38,7 @@ public class ItemBlockChest extends ItemBlock
     @Override
     public int getColorFromItemStack(ItemStack stack, int pass)
     {
-        if (stack != null && stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
+        if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
         {
             return stack.getTagCompound().getInteger("rgb");
         }
