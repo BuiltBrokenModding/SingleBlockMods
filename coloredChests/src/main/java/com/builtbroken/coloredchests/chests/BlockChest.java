@@ -351,12 +351,15 @@ public class BlockChest extends BlockContainer
     }
 
     @Override
-    public boolean canPlaceBlockAt(World world, int x, int y, int z)
+    public boolean canPlaceBlockAt(World world, int i, int j, int k)
     {
-        for (int i = 2; i < ForgeDirection.VALID_DIRECTIONS.length; i++)
+        for (int b = 2; b < ForgeDirection.VALID_DIRECTIONS.length; b++)
         {
-            ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[i];
-            TileEntity tile = world.getTileEntity(dir.offsetX + x, dir.offsetY + y, dir.offsetZ + z);
+            ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[b];
+            int x = dir.offsetX + i;
+            int y = dir.offsetY + j;
+            int z = dir.offsetZ + k;
+            TileEntity tile = world.getTileEntity(x, y, z);
             if (world.getBlock(dir.offsetX + x, dir.offsetY + y, dir.offsetZ + z) == this && tile instanceof TileChest)
             {
                 Color color = ((TileChest) tile).color;
@@ -370,19 +373,23 @@ public class BlockChest extends BlockContainer
     }
 
     @Override
-    public boolean canReplace(World world, int x, int y, int z, int side, ItemStack stack)
+    public boolean canReplace(World world, int i, int j, int k, int side, ItemStack stack)
     {
         Color stackColor = null;
         if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
             stackColor = ColoredChests.getColor(stack.getTagCompound().getInteger("rgb"));
-        for (int i = 2; i < ForgeDirection.VALID_DIRECTIONS.length; i++)
+
+        for (int b = 2; b < ForgeDirection.VALID_DIRECTIONS.length; b++)
         {
-            ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[i];
-            TileEntity tile = world.getTileEntity(dir.offsetX + x, dir.offsetY + y, dir.offsetZ + z);
-            if (world.getBlock(dir.offsetX + x, dir.offsetY + y, dir.offsetZ + z) == this && tile instanceof TileChest)
+            ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[b];
+            int x = dir.offsetX + i;
+            int y = dir.offsetY + j;
+            int z = dir.offsetZ + k;
+            TileEntity tile = world.getTileEntity(x, y, z);
+            if (world.getBlock(x, y, z) == this && tile instanceof TileChest)
             {
                 Color color = ((TileChest) tile).color;
-                if (color == stackColor)
+                if (ColoredChests.doColorsMatch(color, stackColor))
                 {
                     if (isMatchingChest(world, x, y, z - 1, color) || isMatchingChest(world, x, y, z + 1, color) || isMatchingChest(world, x - 1, y, z, color) || isMatchingChest(world, x + 1, y, z, color))
                     {
