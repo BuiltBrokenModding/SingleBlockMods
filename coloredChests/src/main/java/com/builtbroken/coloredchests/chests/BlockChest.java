@@ -153,10 +153,15 @@ public class BlockChest extends BlockContainer
             color = ColoredChests.getColor(stack.getTagCompound().getInteger("rgb"));
             ((TileChest) world.getTileEntity(x, y, z)).color = color;
         }
+
+        //System.out.println("Color of placed chest " + color);
         boolean block = isMatchingChest(world, x, y, z - 1, color);
         boolean block1 = isMatchingChest(world, x, y, z + 1, color);
         boolean block2 = isMatchingChest(world, x - 1, y, z, color);
         boolean block3 = isMatchingChest(world, x + 1, y, z, color);
+
+        //System.out.println("nz" + block + "  pz" + block1 + "  nx" + block2 + "  px" + block3);
+
         byte b0 = 0;
         int facingDirection = MathHelper.floor_double((double) (entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;
 
@@ -227,9 +232,8 @@ public class BlockChest extends BlockContainer
     {
         Block block = world.getBlock(x, y, z);
         TileEntity tile = world.getTileEntity(x, y, z);
-        return block == this && tile instanceof TileChest && color == ((TileChest) tile).color;
+        return block == this && tile instanceof TileChest && ColoredChests.doColorsMatch(color, ((TileChest) tile).color);
     }
-
 
     public void attemptToConnectToChest(World world, int x, int y, int z)
     {
@@ -349,8 +353,19 @@ public class BlockChest extends BlockContainer
     @Override
     public boolean canPlaceBlockAt(World world, int x, int y, int z)
     {
-        //Checks if the block can be placed by checking if a double chest already exists next to the location
-
+        for (int i = 2; i < ForgeDirection.VALID_DIRECTIONS.length; i++)
+        {
+            ForgeDirection dir = ForgeDirection.VALID_DIRECTIONS[i];
+            TileEntity tile = world.getTileEntity(dir.offsetX + x, dir.offsetY + y, dir.offsetZ + z);
+            if (world.getBlock(dir.offsetX + x, dir.offsetY + y, dir.offsetZ + z) == this && tile instanceof TileChest)
+            {
+                Color color = ((TileChest) tile).color;
+                if (isMatchingChest(world, x, y, z - 1, color) || isMatchingChest(world, x, y, z + 1, color) || isMatchingChest(world, x - 1, y, z, color) || isMatchingChest(world, x + 1, y, z, color))
+                {
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
@@ -480,6 +495,7 @@ public class BlockChest extends BlockContainer
         if (tile instanceof TileChest)
         {
             Color color = ((TileChest) tile).color;
+            System.out.println("Opening colored chest with color " + color);
             boolean negZChest = isMatchingChest(world, x, y, z - 1, color);
             boolean posZChest = isMatchingChest(world, x, y, z + 1, color);
             boolean negXChest = isMatchingChest(world, x - 1, y, z, color);

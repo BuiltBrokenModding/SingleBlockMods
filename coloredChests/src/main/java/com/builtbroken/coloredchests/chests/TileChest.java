@@ -1,5 +1,6 @@
 package com.builtbroken.coloredchests.chests;
 
+import com.builtbroken.coloredchests.ColoredChests;
 import com.builtbroken.coloredchests.network.PacketChest;
 import com.builtbroken.coloredchests.network.PacketManager;
 import net.minecraft.entity.player.EntityPlayer;
@@ -211,7 +212,7 @@ public class TileChest extends TileInv
         if (this.worldObj != null)
         {
             TileEntity tile = this.worldObj.getTileEntity(x, y, z);
-            return tile instanceof TileChest && ((TileChest) tile).color == color;
+            return tile instanceof TileChest && ColoredChests.doColorsMatch(((TileChest) tile).color,  color);
         }
         return false;
     }

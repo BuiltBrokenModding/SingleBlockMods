@@ -77,4 +77,8 @@ public class ColoredChests
         return rgb;
     }
 
+    public static boolean doColorsMatch(Color a, Color b)
+    {
+        return a == b || a != null && b != null && a.getRGB() == b.getRGB();
+    }
 }
