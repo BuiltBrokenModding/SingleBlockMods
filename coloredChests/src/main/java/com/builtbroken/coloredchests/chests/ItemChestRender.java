@@ -1,5 +1,6 @@
 package com.builtbroken.coloredchests.chests;
 
+import com.builtbroken.coloredchests.ColoredChests;
 import cpw.mods.fml.client.FMLClientHandler;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.client.IItemRenderer;
@@ -36,9 +37,14 @@ public class ItemChestRender implements IItemRenderer
         RenderChest.modelChest.chestLid.rotateAngleX = 0;
 
         //set color
-        Color color = new Color(item.getItem().getColorFromItemStack(item, 0));
-        GL11.glColor3b((byte)color.getRed(), (byte)color.getGreen(), (byte)color.getBlue());
-
+        if (item.getTagCompound() != null && item.getTagCompound().hasKey("rgb"))
+        {
+            Color color = ColoredChests.getColor(item.getTagCompound().getInteger("rgb"));
+            float r = (float)color.getRed() / 255f;
+            float g = (float)color.getGreen() / 255f;
+            float b = (float)color.getBlue() / 255f;
+            GL11.glColor3f(r, g, b);
+        }
 
         FMLClientHandler.instance().getClient().renderEngine.bindTexture(RenderChest.textureChest);
         RenderChest.modelChest.renderAll();

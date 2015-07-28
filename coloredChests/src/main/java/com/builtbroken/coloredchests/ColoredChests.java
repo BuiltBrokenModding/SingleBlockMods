@@ -15,6 +15,7 @@ import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
 import java.io.File;
 
 /**
@@ -60,6 +61,20 @@ public class ColoredChests
     public void postInit(FMLPostInitializationEvent event)
     {
         proxy.postInit();
+    }
+
+
+    public static Color getColor(int rgb)
+    {
+        return new Color((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
+    }
+
+    public static int getRGB(Color color)
+    {
+        int rgb = color.getRed();
+        rgb = (rgb << 8) + color.getGreen();
+        rgb = (rgb << 8) + color.getBlue();
+        return rgb;
     }
 
 }

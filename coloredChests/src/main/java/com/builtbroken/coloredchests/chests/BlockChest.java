@@ -1,5 +1,6 @@
 package com.builtbroken.coloredchests.chests;
 
+import com.builtbroken.coloredchests.ColoredChests;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -12,6 +13,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
@@ -21,7 +23,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
+import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
 
@@ -40,6 +44,8 @@ public class BlockChest extends BlockContainer
 {
     private final Random random = new Random();
 
+    //public static Color[] defaultColors = new Color[]{Color.BLACK, Color.RED, Color.GREEN, new Color(102, 51, 0), Color.BLUE, new Color(170, 0, 170), Color.CYAN, new Color(224, 224, 224), Color.GRAY, Color.PINK, new Color(128, 255, 0), Color.YELLOW, new Color(51, 255, 255), Color.MAGENTA, Color.ORANGE, Color.WHITE};
+    //public static final String[] defaultColorNames = new String[]{"black", "red", "green", "brown", "blue", "purple", "cyan", "silver", "gray", "pink", "lime", "yellow", "lightBlue", "magenta", "orange", "white"};
 
     public BlockChest()
     {
@@ -53,11 +59,13 @@ public class BlockChest extends BlockContainer
     @SideOnly(Side.CLIENT)
     public void getSubBlocks(Item item, CreativeTabs tab, List items)
     {
+        //for (int i = 0; i < defaultColorNames.length && i < defaultColors.length; i++)
         for (int i = 0; i < ItemDye.field_150922_c.length; i++)
         {
             ItemStack stack = new ItemStack(item);
             stack.setTagCompound(new NBTTagCompound());
             stack.getTagCompound().setInteger("rgb", ItemDye.field_150922_c[i]);
+            stack.getTagCompound().setString("colorName", ItemDye.field_150921_b[i]);
             items.add(stack);
         }
     }
@@ -205,7 +213,8 @@ public class BlockChest extends BlockContainer
         {
             ((TileChest) world.getTileEntity(x, y, z)).setCustomName(stack.getDisplayName());
         }
-        ((TileChest) world.getTileEntity(x, y, z)).color = new Color(stack.getItem().getColorFromItemStack(stack, 0));
+        if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
+            ((TileChest) world.getTileEntity(x, y, z)).color = ColoredChests.getColor(stack.getTagCompound().getInteger("rgb"));
     }
 
 
@@ -329,6 +338,7 @@ public class BlockChest extends BlockContainer
     {
         int l = 0;
 
+        //TODO recode to allow colored chest to be placed next to each other, may need to be done in the ItemBlock
         if (world.getBlock(x - 1, y, z) == this)
         {
             ++l;
@@ -349,10 +359,10 @@ public class BlockChest extends BlockContainer
             ++l;
         }
 
-        return l > 1 ? false : (this.func_149952_n(world, x - 1, y, z) ? false : (this.func_149952_n(world, x + 1, y, z) ? false : (this.func_149952_n(world, x, y, z - 1) ? false : !this.func_149952_n(world, x, y, z + 1))));
+        return l > 1 ? false : (this.hasConnectedChest(world, x - 1, y, z) ? false : (this.hasConnectedChest(world, x + 1, y, z) ? false : (this.hasConnectedChest(world, x, y, z - 1) ? false : !this.hasConnectedChest(world, x, y, z + 1))));
     }
 
-    private boolean func_149952_n(World world, int x, int y, int z)
+    private boolean hasConnectedChest(World world, int x, int y, int z)
     {
         return world.getBlock(x, y, z) != this ? false : (world.getBlock(x - 1, y, z) == this ? true : (world.getBlock(x + 1, y, z) == this ? true : (world.getBlock(x, y, z - 1) == this ? true : world.getBlock(x, y, z + 1) == this)));
     }
@@ -537,6 +547,19 @@ public class BlockChest extends BlockContainer
     }
 
     @Override
+    public ItemStack getPickBlock(MovingObjectPosition target, World world, int x, int y, int z)
+    {
+        ItemStack stack = new ItemStack(this, 1, this.getDamageValue(world, x, y, z));
+        TileEntity tile = world.getTileEntity(x, y, z);
+        if (tile instanceof TileChest && ((TileChest) tile).color != null)
+        {
+            stack.setTagCompound(new NBTTagCompound());
+            stack.getTagCompound().setInteger("rgb", ((TileChest) tile).color.getRGB());
+        }
+        return stack;
+    }
+
+    @Override
     public boolean hasComparatorInputOverride()
     {
         return true;
@@ -552,6 +575,11 @@ public class BlockChest extends BlockContainer
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister reg)
     {
-        this.blockIcon = reg.registerIcon("planks_oak");
+    }
+
+    @Override
+    public IIcon getIcon(int side, int meta)
+    {
+        return Blocks.planks.getIcon(side, meta);
     }
 }

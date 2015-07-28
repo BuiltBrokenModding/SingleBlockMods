@@ -1,5 +1,6 @@
 package com.builtbroken.coloredchests.chests;
 
+import com.builtbroken.coloredchests.ColoredChests;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -26,10 +27,18 @@ public class ItemBlockChest extends ItemBlock
     @Override
     public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean b)
     {
-        if (stack != null && stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
+        if (stack != null && stack.getTagCompound() != null)
         {
-            Color color = new Color(stack.getTagCompound().getInteger("rgb"));
-            list.add("R: " + color.getRed() + " G: " + color.getGreen() + " B: " + color.getBlue());
+            if (stack.getTagCompound().hasKey("rgb"))
+            {
+                Color color = ColoredChests.getColor(stack.getTagCompound().getInteger("rgb"));
+                list.add("R: " + color.getRed() + " G: " + color.getGreen() + " B: " + color.getBlue());
+            }
+
+            if (stack.getTagCompound().hasKey("colorName"))
+            {
+                list.add("N: " + stack.getTagCompound().getString("colorName"));
+            }
         }
     }
 
