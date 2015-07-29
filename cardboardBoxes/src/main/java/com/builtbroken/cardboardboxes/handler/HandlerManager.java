@@ -40,24 +40,38 @@ public class HandlerManager
         }
     }
 
-    public boolean canPickUp(World world, int x, int y, int z)
+    public CanPickUpResult canPickUp(World world, int x, int y, int z)
     {
         Block block = world.getBlock(x, y, z);
         if (!blackListedBlocks.contains(block))
         {
             TileEntity tile = world.getTileEntity(x, y, z);
-            if(tile != null && !blackListedTiles.contains(tile.getClass()))
+            if (tile != null)
             {
-                //Check if we even have data to store, no data no point in using a box
-                NBTTagCompound nbt = new NBTTagCompound();
-                tile.writeToNBT(nbt);
-                nbt.removeTag("x");
-                nbt.removeTag("y");
-                nbt.removeTag("z");
-                nbt.removeTag("id");
-                return !nbt.hasNoTags();
+                if (!blackListedTiles.contains(tile.getClass()))
+                {
+                    //Check if we even have data to store, no data no point in using a box
+                    NBTTagCompound nbt = new NBTTagCompound();
+                    tile.writeToNBT(nbt);
+                    nbt.removeTag("x");
+                    nbt.removeTag("y");
+                    nbt.removeTag("z");
+                    nbt.removeTag("id");
+                    return !nbt.hasNoTags() ? CanPickUpResult.CAN_PICK_UP : CanPickUpResult.NO_DATA;
+                }
+                return CanPickUpResult.BANNED_TILE;
             }
+            return CanPickUpResult.NO_TILE;
         }
-        return false;
+        return CanPickUpResult.BANNED_BLOCK;
+    }
+
+    public enum CanPickUpResult
+    {
+        CAN_PICK_UP,
+        BANNED_BLOCK,
+        BANNED_TILE,
+        NO_TILE,
+        NO_DATA
     }
 }

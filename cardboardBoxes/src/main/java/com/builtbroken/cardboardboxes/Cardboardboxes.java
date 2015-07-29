@@ -4,6 +4,13 @@ import com.builtbroken.cardboardboxes.box.BlockBox;
 import com.builtbroken.cardboardboxes.box.ItemBlockBox;
 import com.builtbroken.cardboardboxes.box.TileBox;
 import com.builtbroken.cardboardboxes.handler.HandlerManager;
+import com.builtbroken.cardboardboxes.mods.IC2Handler;
+import com.builtbroken.cardboardboxes.mods.buildcraft.BuildCraftEnergyHandler;
+import com.builtbroken.cardboardboxes.mods.buildcraft.BuildCraftFactoryHandler;
+import com.builtbroken.cardboardboxes.mods.ModSupportHandler;
+import com.builtbroken.cardboardboxes.mods.TinkersConstructHandler;
+import com.builtbroken.cardboardboxes.mods.buildcraft.BuildCraftTransportHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -19,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,6 +47,8 @@ public class Cardboardboxes
     public static Block blockBox;
 
     public static HandlerManager boxHandler;
+
+    public static HashMap<String, Class<? extends ModSupportHandler>> modSupportHandlerMap = new HashMap();
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -70,7 +80,7 @@ public class Cardboardboxes
             boxHandler.banTile(TileEntityMobSpawner.class);
         }
 
-        //These tiles are banned as there is no point in using a box on them
+        //Remove unwanted interaction
         boxHandler.banBlock(Blocks.beacon);
         boxHandler.banTile(TileEntityBeacon.class);
         boxHandler.banBlock(Blocks.piston);
@@ -103,9 +113,21 @@ public class Cardboardboxes
         boxHandler.banBlock(Blocks.flower_pot);
         boxHandler.banTile(TileEntityFlowerPot.class);
 
+        //Ban our own tile :P
+        boxHandler.banBlock(blockBox);
+        boxHandler.banTile(TileBox.class);
+
+        //Load and run mod support
+        modSupportHandlerMap.put("TConstruct", TinkersConstructHandler.class);
+        modSupportHandlerMap.put("BuildCraft|Factory", BuildCraftFactoryHandler.class);
+        modSupportHandlerMap.put("BuildCraft|Energy", BuildCraftEnergyHandler.class);
+        modSupportHandlerMap.put("BuildCraft|Transport", BuildCraftTransportHandler.class);
+        modSupportHandlerMap.put("BuildCraft|Builders", BuildCraftTransportHandler.class);
+        modSupportHandlerMap.put("IC2", IC2Handler.class);
+        modSupportHandlerMap.put("appliedenergistics2", ModSupportHandler.class);
         try
         {
-            Field field = null;
+            Field field;
             try
             {
                 field = TileEntity.class.getDeclaredField("field_145855_i");
@@ -114,24 +136,48 @@ public class Cardboardboxes
                 field = TileEntity.class.getDeclaredField("nameToClassMap");
             }
             field.setAccessible(true);
-            Map map = (Map) field.get(null);
+            Map<String, Class> map = (Map) field.get(null);
+            for (Map.Entry<String, Class<? extends ModSupportHandler>> entry : modSupportHandlerMap.entrySet())
+            {
+                if (Loader.isModLoaded(entry.getKey()))
+                {
+                    try
+                    {
+                        entry.getValue().newInstance().handleBlackListedContent(map);
+                    } catch (InstantiationException e)
+                    {
+                        LOGGER.error("Failed to create handler for mod " + entry.getKey());
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e)
+                    {
+                        LOGGER.error("Failed to access constructor for handler for mod " + entry.getKey());
+                        e.printStackTrace();
+                    }
+                }
+            }
+
             //TODO see if we can sort the files by mod to help users find what they are looking for
-            for (Object entry : map.entrySet())
+            for (Map.Entry<String, Class> entry : map.entrySet())
             {
                 try
                 {
-                    if (entry instanceof Map.Entry)
+                    config.setCategoryComment("BlackListTilesByName", "Auto generated list of tiles registered in Minecraft that can be blacklisted. If a tile does not show up on this list it is already black listed. The reasoning behind blacklisting tiles is to prevent crashes or unwanted interaction. Such as picking up a piston which can both causes issues and doesn't really matter.");
+                    Class<? extends TileEntity> clazz = entry.getValue();
+                    String name = entry.getKey();
+                    if (name != null && !name.isEmpty())
                     {
-                        Class<? extends TileEntity> clazz = (Class) ((Map.Entry) entry).getValue();
-                        String name = (String) ((Map.Entry) entry).getKey();
-                        if (name != null && !name.isEmpty())
+                        if (clazz != null)
                         {
-                            if (clazz != null && !boxHandler.blackListedTiles.contains(clazz))
+                            String clazzName = clazz.getSimpleName();
+                            boolean shouldBan = boxHandler.blackListedTiles.contains(clazz) || clazzName.contains("cable") || clazzName.contains("wire") || clazzName.contains("pipe") || clazzName.contains("tube") || clazzName.contains("conduit") || clazzName.contains("channel");
+                            if (config.getBoolean("" + clazz, "BlackListTilesByName", shouldBan, "Prevents the cardboard box from picking up this tile[" + name + "]"))
                             {
-                                if (config.getBoolean("" + name, "BlackListTilesByName", false, "Prevents the cardboard box from picking up this tile"))
-                                {
-                                    boxHandler.banTile(clazz);
-                                }
+                                boxHandler.banTile(clazz);
+                            }
+                            else if (shouldBan && boxHandler.blackListedTiles.contains(clazz))
+                            {
+                                //If original was banned but someone unbanned it in the config
+                                boxHandler.blackListedTiles.remove(clazz);
                             }
                         }
                     }

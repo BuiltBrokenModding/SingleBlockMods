@@ -1,6 +1,7 @@
 package com.builtbroken.cardboardboxes.box;
 
 import com.builtbroken.cardboardboxes.Cardboardboxes;
+import com.builtbroken.cardboardboxes.handler.HandlerManager;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -10,6 +11,8 @@ import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
 import java.util.List;
@@ -53,12 +56,15 @@ public class ItemBlockBox extends ItemBlock
         return stack.getTagCompound() != null && stack.getTagCompound().hasKey("storedItem") ? ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("storedItem")) : null;
     }
 
+    @Override
     public boolean onItemUse(ItemStack boxItemStack, EntityPlayer player, World world, int x, int y, int z, int side, float xHit, float yHit, float zHit)
     {
         Block block = world.getBlock(x, y, z);
         ItemStack storedStack = getStoredBlock(boxItemStack);
         if (storedStack != null)
         {
+            if (world.isRemote)
+                return true;
             Block storedBlock = Block.getBlockFromItem(storedStack.getItem());
             int storedMeta = Math.max(0, Math.min(storedStack.getItemDamage(), 16));
             NBTTagCompound nbt = storedStack.getTagCompound() != null && storedStack.getTagCompound().hasKey("tileData") ? storedStack.getTagCompound().getCompoundTag("tileData") : null;
@@ -139,33 +145,53 @@ public class ItemBlockBox extends ItemBlock
                 return true;
             }
         }
-        else if (Cardboardboxes.boxHandler.canPickUp(world, x, y, z))
+        else if (!(block instanceof BlockBox))
         {
-            TileEntity tile = world.getTileEntity(x, y, z);
-            if (tile != null)
+            if (world.isRemote)
+                return true;
+            HandlerManager.CanPickUpResult result = Cardboardboxes.boxHandler.canPickUp(world, x, y, z);
+            if (result == HandlerManager.CanPickUpResult.CAN_PICK_UP)
             {
-                ItemStack boxStack = new ItemStack(block, 1, block.getDamageValue(world, x, y, z));
-                NBTTagCompound nbt = new NBTTagCompound();
-                tile.writeToNBT(nbt);
-                nbt.removeTag("id");
-                nbt.removeTag("x");
-                nbt.removeTag("y");
-                nbt.removeTag("z");
-                boxStack.setTagCompound(new NBTTagCompound());
-                boxStack.getTagCompound().setTag("tileData", nbt);
-                world.removeTileEntity(x, y, z);
-                world.setBlock(x, y, z, Cardboardboxes.blockBox, 0, 3);
-                tile = world.getTileEntity(x, y, z);
-                if (tile instanceof TileBox)
+                TileEntity tile = world.getTileEntity(x, y, z);
+                if (tile != null)
                 {
-                    ((TileBox) tile).storedItem = boxStack;
-                    if (!player.capabilities.isCreativeMode)
+                    ItemStack boxStack = new ItemStack(block, 1, block.getDamageValue(world, x, y, z));
+                    NBTTagCompound nbt = new NBTTagCompound();
+                    tile.writeToNBT(nbt);
+                    nbt.removeTag("id");
+                    nbt.removeTag("x");
+                    nbt.removeTag("y");
+                    nbt.removeTag("z");
+                    boxStack.setTagCompound(new NBTTagCompound());
+                    boxStack.getTagCompound().setTag("tileData", nbt);
+                    world.removeTileEntity(x, y, z);
+                    world.setBlock(x, y, z, Cardboardboxes.blockBox, 0, 3);
+                    tile = world.getTileEntity(x, y, z);
+                    if (tile instanceof TileBox)
                     {
-                        boxItemStack.stackSize--;
+                        ((TileBox) tile).storedItem = boxStack;
+                        if (!player.capabilities.isCreativeMode)
+                        {
+                            boxItemStack.stackSize--;
+                        }
+                        return true;
                     }
-                    return true;
                 }
             }
+            else if (result == HandlerManager.CanPickUpResult.BANNED_TILE)
+            {
+                player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal(getUnlocalizedName() + ".banned.tile.name")));
+            }
+            else if (result == HandlerManager.CanPickUpResult.BANNED_BLOCK)
+            {
+                player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal(getUnlocalizedName() + ".banned.block.name")));
+            }
+            else
+            {
+                player.addChatComponentMessage(new ChatComponentText(StatCollector.translateToLocal(getUnlocalizedName() + ".noData.name")));
+            }
+            //TODO add custom message support for blocks, for example EnchantingTable "Its a bit to fragile for this box"
+            return true;
         }
         return false;
     }
