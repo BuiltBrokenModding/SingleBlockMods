@@ -53,15 +53,15 @@ public class ItemBlockBox extends ItemBlock
         return stack.getTagCompound() != null && stack.getTagCompound().hasKey("storedItem") ? ItemStack.loadItemStackFromNBT(stack.getTagCompound().getCompoundTag("storedItem")) : null;
     }
 
-    public boolean onItemUse(ItemStack stack, EntityPlayer player, World world, int x, int y, int z, int side, float xHit, float yHit, float zHit)
+    public boolean onItemUse(ItemStack boxItemStack, EntityPlayer player, World world, int x, int y, int z, int side, float xHit, float yHit, float zHit)
     {
         Block block = world.getBlock(x, y, z);
-        ItemStack storedStack = getStoredBlock(stack);
+        ItemStack storedStack = getStoredBlock(boxItemStack);
         if (storedStack != null)
         {
             Block storedBlock = Block.getBlockFromItem(storedStack.getItem());
             int storedMeta = Math.max(0, Math.min(storedStack.getItemDamage(), 16));
-            NBTTagCompound nbt = stack.getTagCompound() != null && stack.getTagCompound().hasKey("tileData") ? stack.getTagCompound().getCompoundTag("tileData") : null;
+            NBTTagCompound nbt = storedStack.getTagCompound() != null && storedStack.getTagCompound().hasKey("tileData") ? storedStack.getTagCompound().getCompoundTag("tileData") : null;
             if (block == Blocks.snow_layer && (world.getBlockMetadata(x, y, z) & 7) < 1)
             {
                 side = 1;
@@ -99,11 +99,11 @@ public class ItemBlockBox extends ItemBlock
                 }
             }
 
-            if (stack.stackSize == 0)
+            if (boxItemStack.stackSize == 0)
             {
                 return false;
             }
-            else if (!player.canPlayerEdit(x, y, z, side, stack))
+            else if (!player.canPlayerEdit(x, y, z, side, boxItemStack))
             {
                 return false;
             }
@@ -111,7 +111,7 @@ public class ItemBlockBox extends ItemBlock
             {
                 return false;
             }
-            else if (world.canPlaceEntityOnSide(storedBlock, x, y, z, false, side, player, stack))
+            else if (world.canPlaceEntityOnSide(storedBlock, x, y, z, false, side, player, storedStack))
             {
                 int meta = storedBlock.onBlockPlaced(world, x, y, z, side, xHit, yHit, zHit, storedMeta);
                 if (world.setBlock(x, y, z, storedBlock, meta, 3))
@@ -127,10 +127,10 @@ public class ItemBlockBox extends ItemBlock
                             tile.zCoord = z;
                         }
                     }
-                    storedBlock.onBlockPlacedBy(world, x, y, z, player, stack);
+                    storedBlock.onBlockPlacedBy(world, x, y, z, player, storedStack);
                     storedBlock.onPostBlockPlaced(world, x, y, z, meta);
                     world.playSoundEffect((double) ((float) x + 0.5F), (double) ((float) y + 0.5F), (double) ((float) z + 0.5F), storedBlock.stepSound.func_150496_b(), (storedBlock.stepSound.getVolume() + 1.0F) / 2.0F, storedBlock.stepSound.getPitch() * 0.8F);
-                    --stack.stackSize;
+                    --boxItemStack.stackSize;
                     if (!player.inventory.addItemStackToInventory(new ItemStack(Cardboardboxes.blockBox)))
                     {
                         player.entityDropItem(new ItemStack(Cardboardboxes.blockBox), 0f);
@@ -153,6 +153,7 @@ public class ItemBlockBox extends ItemBlock
                 nbt.removeTag("z");
                 boxStack.setTagCompound(new NBTTagCompound());
                 boxStack.getTagCompound().setTag("tileData", nbt);
+                world.removeTileEntity(x, y, z);
                 world.setBlock(x, y, z, Cardboardboxes.blockBox, 0, 3);
                 tile = world.getTileEntity(x, y, z);
                 if (tile instanceof TileBox)
@@ -160,7 +161,7 @@ public class ItemBlockBox extends ItemBlock
                     ((TileBox) tile).storedItem = boxStack;
                     if (!player.capabilities.isCreativeMode)
                     {
-                        stack.stackSize--;
+                        boxItemStack.stackSize--;
                     }
                     return true;
                 }
