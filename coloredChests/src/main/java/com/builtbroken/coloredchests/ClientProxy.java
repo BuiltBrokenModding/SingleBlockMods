@@ -4,7 +4,7 @@ import com.builtbroken.coloredchests.chests.ItemChestRender;
 import com.builtbroken.coloredchests.chests.RenderChest;
 import com.builtbroken.coloredchests.chests.TileChest;
 import cpw.mods.fml.client.registry.ClientRegistry;
-import li.cil.oc.common.block.Item;
+import net.minecraft.item.Item;
 import net.minecraftforge.client.MinecraftForgeClient;
 
 /**
