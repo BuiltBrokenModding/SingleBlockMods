@@ -1,34 +1,20 @@
 package com.builtbroken.redbull.item;
 
 import com.builtbroken.redbull.Redbull;
-import com.google.common.collect.HashMultimap;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityPotion;
-import net.minecraft.init.Items;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemPotion;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.potion.PotionHelper;
-import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by Cow Pi on 7/31/2015.
@@ -71,7 +57,7 @@ public class ItemRedbull extends Item
         {
             if (!world.isRemote)
             {
-                player.addPotionEffect(new PotionEffect(Redbull.potionRedBull.getId(), 20 * 5));
+                player.addPotionEffect(new PotionEffect(Redbull.potionRedBull.getId(), 20 * 120));
             }
 
             if (!player.capabilities.isCreativeMode)

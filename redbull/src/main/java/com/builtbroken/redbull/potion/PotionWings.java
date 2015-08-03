@@ -17,7 +17,7 @@ public class PotionWings extends Potion
 {
     public PotionWings(int id)
     {
-        super(id, false, Color.red.getRGB());
+        super(id, false, new Color(1f, 1f, 1f, 0F).getRGB());
         setPotionName(Redbull.PREFIX + "wings");
     }
 
@@ -27,7 +27,6 @@ public class PotionWings extends Potion
         if (entity instanceof EntityPlayerMP)
         {
             PotionEffect effect = entity.getActivePotionEffect(Redbull.potionRedBull);
-            System.out.println("Duration " + effect.getDuration());
             if (effect.getDuration() > 1)
             {
                 if(!((EntityPlayer) entity).capabilities.allowFlying)
@@ -38,7 +37,6 @@ public class PotionWings extends Potion
             }
             else
             {
-                System.out.println("Removing flying effect");
                 ((EntityPlayer) entity).capabilities.allowFlying = false;
                 ((EntityPlayer) entity).capabilities.isFlying = false;
                 ((EntityPlayer) entity).fallDistance = 0.0F;
