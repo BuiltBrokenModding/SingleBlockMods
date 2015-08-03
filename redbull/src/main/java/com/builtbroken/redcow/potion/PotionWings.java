@@ -1,6 +1,6 @@
-package com.builtbroken.redbull.potion;
+package com.builtbroken.redcow.potion;
 
-import com.builtbroken.redbull.Redbull;
+import com.builtbroken.redcow.RedCow;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -18,7 +18,7 @@ public class PotionWings extends Potion
     public PotionWings(int id)
     {
         super(id, false, new Color(1f, 1f, 1f, 0F).getRGB());
-        setPotionName(Redbull.PREFIX + "wings");
+        setPotionName(RedCow.PREFIX + "wings");
     }
 
     @Override
@@ -26,7 +26,7 @@ public class PotionWings extends Potion
     {
         if (entity instanceof EntityPlayerMP)
         {
-            PotionEffect effect = entity.getActivePotionEffect(Redbull.potionRedBull);
+            PotionEffect effect = entity.getActivePotionEffect(RedCow.potionRedBull);
             if (effect.getDuration() > 1)
             {
                 if(!((EntityPlayer) entity).capabilities.allowFlying)

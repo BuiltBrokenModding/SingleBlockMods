@@ -1,4 +1,4 @@
-package com.builtbroken.redbull;
+package com.builtbroken.redcow;
 
 import cpw.mods.fml.common.Loader;
 import net.minecraftforge.common.MinecraftForge;

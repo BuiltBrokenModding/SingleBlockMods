@@ -1,6 +1,5 @@
-package com.builtbroken.redbull;
+package com.builtbroken.redcow;
 
-import com.builtbroken.redbull.Redbull;
 import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import net.minecraft.client.renderer.Tessellator;
@@ -17,7 +16,7 @@ import java.util.Map;
  */
 public class RenderWings
 {
-    public static ResourceLocation wingTexture = new ResourceLocation(Redbull.DOMAIN, "textures/models/wings.png");
+    public static ResourceLocation wingTexture = new ResourceLocation(RedCow.DOMAIN, "textures/models/wings.png");
 
     public static boolean disableExtraUtilitiesSupport = false;
 
@@ -41,22 +40,22 @@ public class RenderWings
                     return ((Map) curFlyingPlayers.get(null)).containsKey(player.getGameProfile().getName());
                 } catch (ClassNotFoundException e)
                 {
-                    Redbull.LOGGER.error("Failed to locate ExtraUtilities angle ring item class. This is most likely a mod version error and should be reported to the Built Broken Modding Team");
+                    RedCow.LOGGER.error("Failed to locate ExtraUtilities angle ring item class. This is most likely a mod version error and should be reported to the Built Broken Modding Team");
                     e.printStackTrace();
                     disableExtraUtilitiesSupport = true;
                 } catch (NoSuchFieldException e)
                 {
-                    Redbull.LOGGER.error("Failed to locate ExtraUtilities current flying players field. This is most likely a mod version error and should be reported to the Built Broken Modding Team");
+                    RedCow.LOGGER.error("Failed to locate ExtraUtilities current flying players field. This is most likely a mod version error and should be reported to the Built Broken Modding Team");
                     e.printStackTrace();
                     disableExtraUtilitiesSupport = true;
                 } catch (IllegalAccessException e)
                 {
-                    Redbull.LOGGER.error("Failed to access ExtraUtilities current flying players field. This is most likely a mod version error and should be reported to the Built Broken Modding Team");
+                    RedCow.LOGGER.error("Failed to access ExtraUtilities current flying players field. This is most likely a mod version error and should be reported to the Built Broken Modding Team");
                     e.printStackTrace();
                     disableExtraUtilitiesSupport = true;
                 }
             }
-            return player.getActivePotionEffect(Redbull.potionRedBull) != null;
+            return player.getActivePotionEffect(RedCow.potionRedBull) != null;
         }
         return false;
     }

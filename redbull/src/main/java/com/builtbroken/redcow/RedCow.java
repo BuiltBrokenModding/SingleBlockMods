@@ -1,7 +1,7 @@
-package com.builtbroken.redbull;
+package com.builtbroken.redcow;
 
-import com.builtbroken.redbull.item.ItemRedbull;
-import com.builtbroken.redbull.potion.PotionWings;
+import com.builtbroken.redcow.item.ItemRedbull;
+import com.builtbroken.redcow.potion.PotionWings;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -16,18 +16,16 @@ import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
-
 /**
  * Created by Dark on 7/25/2015.
  */
-@Mod(modid = Redbull.DOMAIN, name = "Redbull", version = "@MAJOR@.@MINOR@.@REVIS@.@BUILD@")
-public class Redbull
+@Mod(modid = RedCow.DOMAIN, name = "Red Cow", version = "@MAJOR@.@MINOR@.@REVIS@.@BUILD@")
+public class RedCow
 {
-    public static final String DOMAIN = "redbull";
+    public static final String DOMAIN = "redcow";
     public static final String PREFIX = DOMAIN + ":";
 
-    @SidedProxy(clientSide = "com.builtbroken.redbull.ClientProxy", serverSide = "com.builtbroken.redbull.CommonProxy")
+    @SidedProxy(clientSide = "com.builtbroken.redcow.ClientProxy", serverSide = "com.builtbroken.redcow.CommonProxy")
     public static CommonProxy proxy;
 
     public static Configuration config;
@@ -39,13 +37,11 @@ public class Redbull
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
-        LOGGER = LogManager.getLogger("Redbull");
-        config = new Configuration(new File(event.getModConfigurationDirectory(), "bbm/Cardboard_Boxes.cfg"));
-        config.load();
+        LOGGER = LogManager.getLogger("RedCow");
 
         //Create items
         itemRedbullCan = new ItemRedbull();
-        GameRegistry.registerItem(itemRedbullCan, "rbRedBullcan");
+        GameRegistry.registerItem(itemRedbullCan, "rbRedCowCan");
 
         proxy.preInit();
     }
@@ -72,7 +68,6 @@ public class Redbull
         GameRegistry.addShapelessRecipe(new ItemStack(itemRedbullCan, 1, 1), new ItemStack(itemRedbullCan, 1, 0), Items.slime_ball, Items.apple, Items.blaze_powder, Items.carrot);
         GameRegistry.addShapedRecipe(new ItemStack(itemRedbullCan, 16, 0), "g", "i", "g", 'i', Items.iron_ingot, 'g', new ItemStack(Items.dye, 1, 8));
 
-        config.save();
         proxy.postInit();
     }
 }

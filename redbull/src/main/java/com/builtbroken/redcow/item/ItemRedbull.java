@@ -1,6 +1,6 @@
-package com.builtbroken.redbull.item;
+package com.builtbroken.redcow.item;
 
-import com.builtbroken.redbull.Redbull;
+import com.builtbroken.redcow.RedCow;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.renderer.texture.IIconRegister;
@@ -29,7 +29,7 @@ public class ItemRedbull extends Item
         this.setMaxStackSize(16);
         this.setHasSubtypes(true);
         this.setCreativeTab(CreativeTabs.tabFood);
-        this.setUnlocalizedName(Redbull.PREFIX + "can");
+        this.setUnlocalizedName(RedCow.PREFIX + "can");
     }
 
     @Override
@@ -57,7 +57,7 @@ public class ItemRedbull extends Item
         {
             if (!world.isRemote)
             {
-                player.addPotionEffect(new PotionEffect(Redbull.potionRedBull.getId(), 20 * 120));
+                player.addPotionEffect(new PotionEffect(RedCow.potionRedBull.getId(), 20 * 120));
             }
 
             if (!player.capabilities.isCreativeMode)
@@ -111,8 +111,8 @@ public class ItemRedbull extends Item
     @SideOnly(Side.CLIENT)
     public void registerIcons(IIconRegister reg)
     {
-        this.itemIcon = reg.registerIcon(Redbull.PREFIX + "can");
-        this.empty_icon = reg.registerIcon(Redbull.PREFIX + "empty");
+        this.itemIcon = reg.registerIcon(RedCow.PREFIX + "can");
+        this.empty_icon = reg.registerIcon(RedCow.PREFIX + "empty");
     }
 
     @Override
