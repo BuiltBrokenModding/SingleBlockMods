@@ -1,4 +1,4 @@
 item.redcow:can.name=Red Cow Can
 item.redcow:can.empty.name=Empty Can
 item.redcow:can.desc.name=Red Cow gives you wings
-redbull:wings=Wings
+redcow:wings=Wings

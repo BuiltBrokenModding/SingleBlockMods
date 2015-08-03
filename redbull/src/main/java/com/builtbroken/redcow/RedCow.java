@@ -16,6 +16,8 @@ import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+
 /**
  * Created by Dark on 7/25/2015.
  */
@@ -39,6 +41,8 @@ public class RedCow
     {
         LOGGER = LogManager.getLogger("RedCow");
 
+        config = new Configuration(new File(event.getModConfigurationDirectory(), "bbm/RedCow.cfg"));
+        config.load();
         //Create items
         itemRedbullCan = new ItemRedbull();
         GameRegistry.registerItem(itemRedbullCan, "rbRedCowCan");
@@ -69,5 +73,6 @@ public class RedCow
         GameRegistry.addShapedRecipe(new ItemStack(itemRedbullCan, 16, 0), "g", "i", "g", 'i', Items.iron_ingot, 'g', new ItemStack(Items.dye, 1, 8));
 
         proxy.postInit();
+        config.save();
     }
 }
