@@ -33,151 +33,108 @@ import java.util.Map;
 /**
  * Created by Cow Pi on 7/31/2015.
  */
-public class ItemRedbull extends ItemPotion
+public class ItemRedbull extends Item
 {
+    @SideOnly(Side.CLIENT)
+    IIcon empty_icon;
+
     public ItemRedbull()
     {
         this.setMaxStackSize(16);
         this.setHasSubtypes(true);
-        this.setCreativeTab(CreativeTabs.tabBrewing);
-    }
-
-    @Override
-    public ItemStack onEaten(ItemStack item, World world, EntityPlayer player)
-    {
-        if (!player.capabilities.isCreativeMode)
-        {
-            --item.stackSize;
-        }
-
-        if (!world.isRemote)
-        {
-            List list = this.getEffects(item);
-
-            if (list != null)
-            {
-                Iterator iterator = list.iterator();
-
-                while (iterator.hasNext())
-                {
-                    PotionEffect potioneffect = (PotionEffect) iterator.next();
-                    player.addPotionEffect(new PotionEffect(potioneffect));
-                }
-            }
-        }
-
-        if (!player.capabilities.isCreativeMode)
-        {
-            if (item.stackSize <= 0)
-            {
-                return new ItemStack(Items.glass_bottle);
-            }
-
-            player.inventory.addItemStackToInventory(new ItemStack(Items.glass_bottle));
-        }
-
-        return item;
-    }
-
-    public List getEffects(ItemStack p_77832_1_)
-    {
-        if (p_77832_1_.hasTagCompound() && p_77832_1_.getTagCompound().hasKey("CustomPotionEffects", 9))
-        {
-            ArrayList arraylist = new ArrayList();
-            NBTTagList nbttaglist = p_77832_1_.getTagCompound().getTagList("CustomPotionEffects", 10);
-
-            for (int i = 0; i < nbttaglist.tagCount(); ++i)
-            {
-                NBTTagCompound nbttagcompound = nbttaglist.getCompoundTagAt(i);
-                PotionEffect potioneffect = PotionEffect.readCustomPotionEffectFromNBT(nbttagcompound);
-
-                if (potioneffect != null)
-                {
-                    arraylist.add(potioneffect);
-                }
-            }
-
-            return arraylist;
-        } else
-        {
-            List list = (List) this.effectCache.get(Integer.valueOf(p_77832_1_.getItemDamage()));
-
-            if (list == null)
-            {
-                list = PotionHelper.getPotionEffects(p_77832_1_.getItemDamage(), false);
-                this.effectCache.put(Integer.valueOf(p_77832_1_.getItemDamage()), list);
-            }
-
-            return list;
-        }
-    }
-
-    @Override
-    public List getEffects(int meta)
-    {
-        List list = new ArrayList();
-        list.add(new PotionEffect(Redbull.potionRedBull.getId(), 20/*ticks*/ * 120/*seconds*/));
-
-        return list;
-    }
-
-    @Override
-    public int getMaxItemUseDuration(ItemStack p_77626_1_)
-    {
-        return 32;
-    }
-
-    @Override
-    public EnumAction getItemUseAction(ItemStack p_77661_1_)
-    {
-        return EnumAction.drink;
-    }
-
-    @Override
-    public ItemStack onItemRightClick(ItemStack p_77659_1_, World p_77659_2_, EntityPlayer p_77659_3_)
-    {
-        p_77659_3_.setItemInUse(p_77659_1_, this.getMaxItemUseDuration(p_77659_1_));
-        return p_77659_1_;
-    }
-
-    @Override
-    public boolean onItemUse(ItemStack p_77648_1_, EntityPlayer p_77648_2_, World p_77648_3_, int p_77648_4_, int p_77648_5_, int p_77648_6_, int p_77648_7_, float p_77648_8_, float p_77648_9_, float p_77648_10_)
-    {
-        return false;
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IIcon getIconFromDamage(int meta)
-    {
-        return super.getIconFromDamage(meta);
+        this.setCreativeTab(CreativeTabs.tabFood);
+        this.setUnlocalizedName(Redbull.PREFIX + "can");
     }
 
     @Override
     @SideOnly(Side.CLIENT)
     public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean b)
     {
+        if (stack.getItemDamage() != 0)
+        {
+            list.add(StatCollector.translateToLocal(getUnlocalizedName(stack) + ".desc.name"));
+        }
+    }
 
+    @Override
+    public String getUnlocalizedName(ItemStack stack)
+    {
+        if (stack.getItemDamage() == 0)
+            return super.getUnlocalizedName(stack) + ".empty";
+        return super.getUnlocalizedName(stack);
+    }
+
+    @Override
+    public ItemStack onEaten(ItemStack item, World world, EntityPlayer player)
+    {
+        if (item.getItemDamage() != 0 && !player.capabilities.isCreativeMode)
+        {
+            if (!world.isRemote)
+            {
+                player.addPotionEffect(new PotionEffect(Redbull.potionRedBull.getId(), 20 * 5));
+            }
+
+            if (!player.capabilities.isCreativeMode)
+            {
+                --item.stackSize;
+                if (item.stackSize <= 0)
+                {
+                    return new ItemStack(this);
+                }
+
+                player.inventory.addItemStackToInventory(new ItemStack(this));
+            }
+        }
+        return item;
+    }
+
+    @Override
+    public int getMaxItemUseDuration(ItemStack stack)
+    {
+        if (stack.getItemDamage() == 0)
+            return super.getMaxItemUseDuration(stack);
+
+        return 32;
+    }
+
+    @Override
+    public EnumAction getItemUseAction(ItemStack stack)
+    {
+        if (stack.getItemDamage() == 0)
+            return EnumAction.none;
+        return EnumAction.drink;
+    }
+
+    @Override
+    public ItemStack onItemRightClick(ItemStack stack, World world, EntityPlayer player)
+    {
+        if (stack.getItemDamage() != 0)
+            player.setItemInUse(stack, this.getMaxItemUseDuration(stack));
+        return stack;
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public boolean hasEffect(ItemStack stack)
+    public void getSubItems(Item item, CreativeTabs tab, List list)
     {
-        return false;
+        list.add(new ItemStack(item, 1, 0));
+        list.add(new ItemStack(item, 1, 1));
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void getSubItems(Item p_150895_1_, CreativeTabs p_150895_2_, List p_150895_3_)
+    public void registerIcons(IIconRegister reg)
     {
-
+        this.itemIcon = reg.registerIcon(Redbull.PREFIX + "can");
+        this.empty_icon = reg.registerIcon(Redbull.PREFIX + "empty");
     }
 
     @Override
     @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister p_94581_1_)
+    public IIcon getIconFromDamage(int meta)
     {
-
+        if (meta == 0)
+            return empty_icon;
+        return itemIcon;
     }
 }
