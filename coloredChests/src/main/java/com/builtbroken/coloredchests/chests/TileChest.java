@@ -60,14 +60,14 @@ public class TileChest extends TileInv
     public void setCustomName(String name)
     {
         this.customName = name;
-        if (!worldObj.isRemote)
+        if (!getWorldObj().isRemote)
             PacketManager.sendToAllAround(new PacketChest(this, PacketChest.ChestPacketType.NAME), this);
     }
 
     public void setColor(Color color)
     {
         this.color = color;
-        if (!worldObj.isRemote)
+        if (!getWorldObj().isRemote)
             PacketManager.sendToAllAround(new PacketChest(this, PacketChest.ChestPacketType.COLOR), this);
     }
 
@@ -167,22 +167,22 @@ public class TileChest extends TileInv
 
             if (this.canConnectToBlock(this.xCoord - 1, this.yCoord, this.zCoord))
             {
-                this.adjacentChestXNeg = (TileChest) this.worldObj.getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord);
+                this.adjacentChestXNeg = (TileChest) this.getWorldObj().getTileEntity(this.xCoord - 1, this.yCoord, this.zCoord);
             }
 
             if (this.canConnectToBlock(this.xCoord + 1, this.yCoord, this.zCoord))
             {
-                this.adjacentChestXPos = (TileChest) this.worldObj.getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord);
+                this.adjacentChestXPos = (TileChest) this.getWorldObj().getTileEntity(this.xCoord + 1, this.yCoord, this.zCoord);
             }
 
             if (this.canConnectToBlock(this.xCoord, this.yCoord, this.zCoord - 1))
             {
-                this.adjacentChestZNeg = (TileChest) this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1);
+                this.adjacentChestZNeg = (TileChest) this.getWorldObj().getTileEntity(this.xCoord, this.yCoord, this.zCoord - 1);
             }
 
             if (this.canConnectToBlock(this.xCoord, this.yCoord, this.zCoord + 1))
             {
-                this.adjacentChestZPos = (TileChest) this.worldObj.getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1);
+                this.adjacentChestZPos = (TileChest) this.getWorldObj().getTileEntity(this.xCoord, this.yCoord, this.zCoord + 1);
             }
 
             if (this.adjacentChestZNeg != null)
@@ -209,9 +209,9 @@ public class TileChest extends TileInv
 
     private boolean canConnectToBlock(int x, int y, int z)
     {
-        if (this.worldObj != null)
+        if (this.getWorldObj() != null)
         {
-            TileEntity tile = this.worldObj.getTileEntity(x, y, z);
+            TileEntity tile = this.getWorldObj().getTileEntity(x, y, z);
             return tile instanceof TileChest && ColoredChests.doColorsMatch(((TileChest) tile).color,  color);
         }
         return false;
@@ -225,11 +225,11 @@ public class TileChest extends TileInv
         ++this.ticksSinceSync;
         float f;
 
-        if (!this.worldObj.isRemote && this.numPlayersUsing != 0 && (this.ticksSinceSync + this.xCoord + this.yCoord + this.zCoord) % 200 == 0)
+        if (!this.getWorldObj().isRemote && this.numPlayersUsing != 0 && (this.ticksSinceSync + this.xCoord + this.yCoord + this.zCoord) % 200 == 0)
         {
             this.numPlayersUsing = 0;
             f = 5.0F;
-            List list = this.worldObj.getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox((double) ((float) this.xCoord - f), (double) ((float) this.yCoord - f), (double) ((float) this.zCoord - f), (double) ((float) (this.xCoord + 1) + f), (double) ((float) (this.yCoord + 1) + f), (double) ((float) (this.zCoord + 1) + f)));
+            List list = this.getWorldObj().getEntitiesWithinAABB(EntityPlayer.class, AxisAlignedBB.getBoundingBox((double) ((float) this.xCoord - f), (double) ((float) this.yCoord - f), (double) ((float) this.zCoord - f), (double) ((float) (this.xCoord + 1) + f), (double) ((float) (this.yCoord + 1) + f), (double) ((float) (this.zCoord + 1) + f)));
             Iterator iterator = list.iterator();
 
             while (iterator.hasNext())
@@ -267,7 +267,7 @@ public class TileChest extends TileInv
                 d1 += 0.5D;
             }
 
-            this.worldObj.playSoundEffect(d1, (double) this.yCoord + 0.5D, d2, "random.chestopen", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+            this.getWorldObj().playSoundEffect(d1, (double) this.yCoord + 0.5D, d2, "random.chestopen", 0.5F, this.getWorldObj().rand.nextFloat() * 0.1F + 0.9F);
         }
 
         if (this.numPlayersUsing == 0 && this.lidAngle > 0.0F || this.numPlayersUsing > 0 && this.lidAngle < 1.0F)
@@ -305,7 +305,7 @@ public class TileChest extends TileInv
                     d2 += 0.5D;
                 }
 
-                this.worldObj.playSoundEffect(d2, (double) this.yCoord + 0.5D, d0, "random.chestclosed", 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+                this.getWorldObj().playSoundEffect(d2, (double) this.yCoord + 0.5D, d0, "random.chestclosed", 0.5F, this.getWorldObj().rand.nextFloat() * 0.1F + 0.9F);
             }
 
             if (this.lidAngle < 0.0F)
@@ -338,9 +338,9 @@ public class TileChest extends TileInv
         }
 
         ++this.numPlayersUsing;
-        this.worldObj.addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
-        this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
-        this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord - 1, this.zCoord, this.getBlockType());
+        this.getWorldObj().addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
+        this.getWorldObj().notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
+        this.getWorldObj().notifyBlocksOfNeighborChange(this.xCoord, this.yCoord - 1, this.zCoord, this.getBlockType());
     }
 
     @Override
@@ -349,9 +349,9 @@ public class TileChest extends TileInv
         if (this.getBlockType() instanceof BlockChest)
         {
             --this.numPlayersUsing;
-            this.worldObj.addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
-            this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
-            this.worldObj.notifyBlocksOfNeighborChange(this.xCoord, this.yCoord - 1, this.zCoord, this.getBlockType());
+            this.getWorldObj().addBlockEvent(this.xCoord, this.yCoord, this.zCoord, this.getBlockType(), 1, this.numPlayersUsing);
+            this.getWorldObj().notifyBlocksOfNeighborChange(this.xCoord, this.yCoord, this.zCoord, this.getBlockType());
+            this.getWorldObj().notifyBlocksOfNeighborChange(this.xCoord, this.yCoord - 1, this.zCoord, this.getBlockType());
         }
     }
 

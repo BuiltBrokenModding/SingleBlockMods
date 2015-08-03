@@ -73,7 +73,7 @@ public class PacketManager
 
     public static void sendToAllAround(PacketBase packet, TileEntity tile, int distance)
     {
-        sendToAllAround(packet, new NetworkRegistry.TargetPoint(tile.worldObj.provider.dimensionId, tile.xCoord, tile.yCoord, tile.zCoord, distance));
+        sendToAllAround(packet, new NetworkRegistry.TargetPoint(tile.getWorldObj().provider.dimensionId, tile.xCoord, tile.yCoord, tile.zCoord, distance));
     }
 
     public static void sendToAllAround(PacketBase packet, NetworkRegistry.TargetPoint point)
@@ -188,9 +188,9 @@ public class PacketManager
                 EntityPlayerMP player = ((NetHandlerPlayServer) ctx.channel().attr(NetworkRegistry.NET_HANDLER).get()).playerEntity;
                 if (player != null)
                 {
-                    if (player.worldObj != null)
+                    if (player.getEntityWorld() != null)
                     {
-                        packet.onServerPacket(player.worldObj, player);
+                        packet.onServerPacket(player.getEntityWorld(), player);
                     }
                     else
                     {

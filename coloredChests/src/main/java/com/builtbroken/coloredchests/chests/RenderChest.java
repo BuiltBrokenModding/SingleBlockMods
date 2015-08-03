@@ -32,12 +32,12 @@ public class RenderChest extends TileEntitySpecialRenderer
         else
         {
             Block block = tile.getBlockType();
-            i = tile.worldObj.getBlockMetadata(tile.xCoord, tile.yCoord, tile.zCoord);
+            i = tile.getWorldObj().getBlockMetadata(tile.xCoord, tile.yCoord, tile.zCoord);
 
             if (block instanceof BlockChest && i == 0)
             {
                 ((BlockChest) block).attemptToConnectToChest(tile.getWorldObj(), tile.xCoord, tile.yCoord, tile.zCoord);
-                i = tile.worldObj.getBlockMetadata(tile.xCoord, tile.yCoord, tile.zCoord);
+                i = tile.getWorldObj().getBlockMetadata(tile.xCoord, tile.yCoord, tile.zCoord);
             }
 
             tile.checkForAdjacentChests();
