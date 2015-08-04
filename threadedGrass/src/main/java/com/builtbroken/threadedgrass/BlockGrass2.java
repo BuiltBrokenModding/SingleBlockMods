@@ -1,9 +1,7 @@
 package com.builtbroken.threadedgrass;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockGlass;
 import net.minecraft.block.BlockGrass;
-import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 
@@ -33,7 +31,8 @@ public class BlockGrass2 extends BlockGrass
                 if (world.getBlockLightValue(x, y + 1, z) < 4 && world.getBlockLightOpacity(x, y + 1, z) > 2)
                 {
                     world.setBlock(x, y, z, Blocks.dirt);
-                } else if (world.getBlockLightValue(x, y + 1, z) >= 9)
+                }
+                else if (world.getBlockLightValue(x, y + 1, z) >= 9)
                 {
                     for (int l = 0; l < 4; ++l)
                     {
