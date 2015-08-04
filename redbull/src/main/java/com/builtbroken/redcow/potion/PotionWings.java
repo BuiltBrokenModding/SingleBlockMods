@@ -26,10 +26,15 @@ public class PotionWings extends Potion
     {
         if (entity instanceof EntityPlayerMP)
         {
+            if (((EntityPlayerMP) entity).capabilities.isCreativeMode)
+            {
+                entity.removePotionEffect(RedCow.potionRedBull.getId());
+                return;
+            }
             PotionEffect effect = entity.getActivePotionEffect(RedCow.potionRedBull);
             if (effect.getDuration() > 1)
             {
-                if(!((EntityPlayer) entity).capabilities.allowFlying)
+                if (!((EntityPlayer) entity).capabilities.allowFlying)
                 {
                     ((EntityPlayer) entity).capabilities.allowFlying = true;
                     ((EntityPlayerMP) entity).playerNetServerHandler.sendPacket(new S39PacketPlayerAbilities(((EntityPlayerMP) entity).capabilities));
