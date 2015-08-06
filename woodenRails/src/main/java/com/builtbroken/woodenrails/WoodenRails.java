@@ -1,5 +1,6 @@
 package com.builtbroken.woodenrails;
 
+import com.builtbroken.woodenrails.rail.BlockWoodrails;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -9,6 +10,7 @@ import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import com.builtbroken.woodenrails.cart.EntityEmptyWoodenCart;
 import com.builtbroken.woodenrails.cart.ItemWoodenCart;
+import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -35,6 +37,7 @@ public class WoodenRails
     public static Logger LOGGER;
 
     public static Item itemWoodCart;
+    public static Block blockRail;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -42,7 +45,7 @@ public class WoodenRails
         LOGGER = LogManager.getLogger("WoodenRails");
         Configuration config = new Configuration(new File(event.getModConfigurationDirectory(), "bbm/Wooden_Rails.cfg"));
         config.load();
-        if(config.getBoolean("EnableCart", Configuration.CATEGORY_GENERAL, true, "Allows disabling the wooden cart item and entity"))
+        if (config.getBoolean("EnableCart", Configuration.CATEGORY_GENERAL, true, "Allows disabling the wooden cart item and entity"))
         {
             itemWoodCart = new ItemWoodenCart();
             GameRegistry.registerItem(itemWoodCart, "wrWoodenCart", DOMAIN);
@@ -50,9 +53,10 @@ public class WoodenRails
             EntityRegistry.registerGlobalEntityID(EntityEmptyWoodenCart.class, "wrEmptyCart", EntityRegistry.findGlobalUniqueEntityId());
             EntityRegistry.registerModEntity(EntityEmptyWoodenCart.class, "wrEmptyCart", config.getInt("EmptyCart", "EntityIDs", ENTITY_ID_PREFIX, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
         }
-        if(config.getBoolean("EnableRail", Configuration.CATEGORY_GENERAL, true, "Allows disabling the wooden rail item and block"))
+        if (config.getBoolean("EnableRail", Configuration.CATEGORY_GENERAL, true, "Allows disabling the wooden rail item and block"))
         {
-
+            blockRail = new BlockWoodrails();
+            GameRegistry.registerBlock(blockRail, "wrWoodenRail");
         }
         config.save();
         proxy.preInit();
@@ -67,10 +71,10 @@ public class WoodenRails
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event)
     {
-        if(itemWoodCart != null)
+        if (itemWoodCart != null)
         {
             //TODO ensure/add ore dictionary support
-            GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart), "psp","pbp","psp", 'b', Items.boat, 's', Items.stick, 'w', Blocks.planks);
+            GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart), "psp", "pbp", "psp", 'b', Items.boat, 's', Items.stick, 'w', Blocks.planks);
         }
         proxy.postInit();
     }
