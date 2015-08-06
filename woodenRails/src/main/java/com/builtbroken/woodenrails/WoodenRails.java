@@ -74,7 +74,11 @@ public class WoodenRails
         if (itemWoodCart != null)
         {
             //TODO ensure/add ore dictionary support
-            GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart), "psp", "pbp", "psp", 'b', Items.boat, 's', Items.stick, 'w', Blocks.planks);
+            GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart), "psp", " b ", "psp", 'b', Items.boat, 's', Items.stick, 'p', Blocks.planks);
+        }
+        if (blockRail != null)
+        {
+            GameRegistry.addShapedRecipe(new ItemStack(blockRail, 16, 0), "ptp", "psp", "ptp", 's', Items.stick, 'p', Blocks.planks, 't', Blocks.sapling);
         }
         proxy.postInit();
     }

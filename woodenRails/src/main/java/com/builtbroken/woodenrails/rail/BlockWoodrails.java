@@ -34,7 +34,7 @@ public class BlockWoodrails extends BlockRailBase
     @SideOnly(Side.CLIENT)
     public void registerBlockIcons(IIconRegister reg)
     {
-        super.registerBlockIcons(reg);
-        this.turnedTrack = reg.registerIcon(this.getTextureName() + "_turned");
+        this.blockIcon = reg.registerIcon(WoodenRails.PREFIX + "rail_normal");
+        this.turnedTrack = reg.registerIcon(WoodenRails.PREFIX + "rail_normal_turned");
     }
 }
