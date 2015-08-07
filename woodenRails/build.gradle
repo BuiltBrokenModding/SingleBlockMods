@@ -111,7 +111,6 @@ jar {
 dependencies 
 {
     testCompile 'junit:junit:4.11'
-    compile "dev.builtbroken.voltzengine:VoltzEngine:1.7.10-0.+:deobf-dev"
 }
 
 def getDate() {
