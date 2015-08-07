@@ -96,10 +96,10 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
             FillBucketEvent event = new FillBucketEvent(player, itemstack, world, movingobjectposition);
             if (MinecraftForge.EVENT_BUS.post(event))
             {
-                //Even was cancel for what ever reason
+                //Event was cancel for what ever reason
                 return itemstack;
             }
-            else if (event.getResult() == Event.Result.ALLOW)
+            else if (event.getResult() == Event.Result.ALLOW && event.result != null && event.result.getItem() == this)
             {
                 return consumeBucket(itemstack, player, event.result);
             }
