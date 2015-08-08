@@ -126,9 +126,14 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                 }
                 else //Empty bucket code
                 {
-                    Material material = world.getBlock(i, j, k).getMaterial();
-                    if (material.isLiquid() || !material.isSolid())
-                        return itemstack;
+                    Block block = world.getBlock(i, j, k);
+                    Material material = block.getMaterial();
+
+                    if (!material.isSolid() && block.isReplaceable(world, i, j, k) && player.canPlayerEdit(i, j, k, movingobjectposition.sideHit, itemstack))
+                    {
+                        return placeFluid(player, itemstack, world, i, j, k);
+                    }
+
                     //Offset position based on side hit
                     if (movingobjectposition.sideHit == 0)
                     {
@@ -238,41 +243,46 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
      */
     public ItemStack placeFluid(EntityPlayer player, ItemStack itemstack, World world, int x, int y, int z)
     {
-        if (isFull(itemstack) && world.isAirBlock(x, y, z))
+        Block block = world.getBlock(x, y, z);
+        //Material material = block.getMaterial();
+        if (isFull(itemstack))
         {
-            FluidStack stack = getFluid(itemstack);
-            if (stack != null && stack.getFluid() != null && stack.getFluid().canBePlacedInWorld() && stack.getFluid().getBlock() != null)
+            if(world.isAirBlock(x, y, z) || block.isReplaceable(world, x, y, z))
             {
-                //TODO add support for oil and other fuel types to explode in the nether
-                if (world.provider.isHellWorld && stack.getFluid().getUnlocalizedName().contains("water"))
+                FluidStack stack = getFluid(itemstack);
+                if (stack != null && stack.getFluid() != null && stack.getFluid().canBePlacedInWorld() && stack.getFluid().getBlock() != null)
                 {
-                    world.playSoundEffect((double) ((float) x + 0.5F), (double) ((float) y + 0.5F), (double) ((float) z + 0.5F), "random.fizz", 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
+                    //TODO add support for oil and other fuel types to explode in the nether
+                    if (world.provider.isHellWorld && stack.getFluid().getUnlocalizedName().contains("water"))
+                    {
+                        world.playSoundEffect((double) ((float) x + 0.5F), (double) ((float) y + 0.5F), (double) ((float) z + 0.5F), "random.fizz", 0.5F, 2.6F + (world.rand.nextFloat() - world.rand.nextFloat()) * 0.8F);
 
-                    for (int l = 0; l < 8; ++l)
-                    {
-                        world.spawnParticle("largesmoke", (double) x + Math.random(), (double) y + Math.random(), (double) z + Math.random(), 0.0D, 0.0D, 0.0D);
-                    }
-                    return consumeBucket(itemstack, player, new ItemStack(this, 1, itemstack.getItemDamage()));
-                }
-                else
-                {
-                    if (!world.isRemote)
-                    {
-                        world.func_147480_a(x, y, z, true);
-                    }
-                    if(stack.getFluid() == FluidRegistry.WATER)
-                    {
-                        world.setBlock(x, y, z, Blocks.flowing_water);
-                    }
-                    else  if(stack.getFluid() == FluidRegistry.LAVA)
-                    {
-                        world.setBlock(x, y, z, Blocks.flowing_lava);
+                        for (int l = 0; l < 8; ++l)
+                        {
+                            world.spawnParticle("largesmoke", (double) x + Math.random(), (double) y + Math.random(), (double) z + Math.random(), 0.0D, 0.0D, 0.0D);
+                        }
+                        return consumeBucket(itemstack, player, new ItemStack(this, 1, itemstack.getItemDamage()));
                     }
                     else
                     {
-                        world.setBlock(x, y, z, stack.getFluid().getBlock());
+                        if (!world.isRemote)
+                        {
+                            world.func_147480_a(x, y, z, true);
+                        }
+                        if (stack.getFluid() == FluidRegistry.WATER)
+                        {
+                            world.setBlock(x, y, z, Blocks.flowing_water);
+                        }
+                        else if (stack.getFluid() == FluidRegistry.LAVA)
+                        {
+                            world.setBlock(x, y, z, Blocks.flowing_lava);
+                        }
+                        else
+                        {
+                            world.setBlock(x, y, z, stack.getFluid().getBlock());
+                        }
+                        return consumeBucket(itemstack, player, new ItemStack(this, 1, itemstack.getItemDamage()));
                     }
-                    return consumeBucket(itemstack, player, new ItemStack(this, 1, itemstack.getItemDamage()));
                 }
             }
         }
