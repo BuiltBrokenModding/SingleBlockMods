@@ -1,20 +1,17 @@
 package com.builtbroken.woodenbucket;
 
+import com.builtbroken.woodenbucket.bucket.ItemWoodenBucket;
+import com.builtbroken.woodenbucket.fluid.BlockMilk;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
+import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IIcon;
-import net.minecraftforge.client.event.TextureStitchEvent;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fluids.Fluid;
 import net.minecraftforge.fluids.FluidRegistry;
@@ -74,16 +71,10 @@ public class WoodenBucket
     {
         if (GENERATE_MILK_FLUID && FluidRegistry.getFluid("milk") == null)
         {
-            fluid_milk = new Fluid("milk")
-            {
-                @Override
-                public int getColor()
-                {
-                    return 0xFFFFFF;
-                }
-            };
+            fluid_milk = new Fluid("milk");
             FluidRegistry.registerFluid(fluid_milk);
-            MinecraftForge.EVENT_BUS.register(this);
+            Block blockMilk = new BlockMilk(fluid_milk);
+            GameRegistry.registerBlock(blockMilk, "wbBlockMilk");
         }
 
         //TODO add crafting recipes for milk bucket
@@ -101,16 +92,5 @@ public class WoodenBucket
                 GameRegistry.addShapedRecipe(new ItemStack(itemBucket, 1, ItemWoodenBucket.BucketTypes.OAK.ordinal()), " s ", "wcw", " w ", 'w', itemstack, 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));
             }
         }
-    }
-
-    @SideOnly(Side.CLIENT)
-    @SubscribeEvent
-    public void textureStichEvent(TextureStitchEvent.Pre event)
-    {
-        IIcon flowing = event.map.registerIcon(PREFIX + "milk_flow");
-        IIcon still = event.map.registerIcon(PREFIX + "milk_still");
-
-        fluid_milk.setFlowingIcon(flowing);
-        fluid_milk.setStillIcon(still);
     }
 }

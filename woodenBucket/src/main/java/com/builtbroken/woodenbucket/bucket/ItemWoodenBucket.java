@@ -1,6 +1,6 @@
-package com.builtbroken.woodenbucket;
+package com.builtbroken.woodenbucket.bucket;
 
-import cpw.mods.fml.common.eventhandler.Event;
+import com.builtbroken.woodenbucket.WoodenBucket;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -22,8 +22,6 @@ import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.FillBucketEvent;
 import net.minecraftforge.fluids.*;
 
 import java.util.HashMap;
@@ -92,19 +90,6 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
 
         if (movingobjectposition != null)
         {
-            //Forge event code, most likely this will do nothing but oh well... TODO check if mods assume bucket passed in is always a vanilla bucket
-            FillBucketEvent event = new FillBucketEvent(player, itemstack, world, movingobjectposition);
-            if (MinecraftForge.EVENT_BUS.post(event))
-            {
-                //Event was cancel for what ever reason
-                return itemstack;
-            }
-            else if (event.getResult() == Event.Result.ALLOW && event.result != null && event.result.getItem() == this)
-            {
-                return consumeBucket(itemstack, player, event.result);
-            }
-
-
             if (movingobjectposition.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK)
             {
                 int i = movingobjectposition.blockX;
@@ -225,17 +210,32 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         }
         else if (block instanceof IFluidBlock && ((IFluidBlock) block).canDrain(world, i, j, k))
         {
+            int meta = world.getBlockMetadata(i, j, k);
             FluidStack drainedFluid = ((IFluidBlock) block).drain(world, i, j, k, false);
+
             //TODO allow partial fills
-            if (drainedFluid != null && drainedFluid.getFluid() != null && drainedFluid.amount == FluidContainerRegistry.BUCKET_VOLUME)
+            if (isValidFluidStack(drainedFluid))
             {
                 ItemStack bucket = new ItemStack(this, 1, itemstack.getItemDamage());
-                ((IFluidBlock) block).drain(world, i, j, k, true);
-                fill(bucket, drainedFluid, true);
-                return this.consumeBucket(itemstack, player, bucket);
+                drainedFluid = ((IFluidBlock) block).drain(world, i, j, k, true);
+
+                if (isValidFluidStack(drainedFluid))
+                {
+                    fill(bucket, drainedFluid, true);
+                    return this.consumeBucket(itemstack, player, bucket);
+                }
+                else if (world.getBlock(i, j, k) != block)
+                {
+                    world.setBlock(i, j, k, block, meta, 3);
+                }
             }
         }
         return itemstack;
+    }
+
+    private boolean isValidFluidStack(FluidStack drainedFluid)
+    {
+        return drainedFluid != null && drainedFluid.getFluid() != null && drainedFluid.amount == FluidContainerRegistry.BUCKET_VOLUME;
     }
 
     /**
@@ -247,7 +247,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         //Material material = block.getMaterial();
         if (isFull(itemstack))
         {
-            if(world.isAirBlock(x, y, z) || block.isReplaceable(world, x, y, z))
+            if (world.isAirBlock(x, y, z) || block.isReplaceable(world, x, y, z))
             {
                 FluidStack stack = getFluid(itemstack);
                 if (stack != null && stack.getFluid() != null && stack.getFluid().canBePlacedInWorld() && stack.getFluid().getBlock() != null)
