@@ -260,8 +260,18 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                     {
                         world.func_147480_a(x, y, z, true);
                     }
-
-                    world.setBlock(x, y, z, stack.getFluid().getBlock(), 0, 3);
+                    if(stack.getFluid() == FluidRegistry.WATER)
+                    {
+                        world.setBlock(x, y, z, Blocks.flowing_water);
+                    }
+                    else  if(stack.getFluid() == FluidRegistry.LAVA)
+                    {
+                        world.setBlock(x, y, z, Blocks.flowing_lava);
+                    }
+                    else
+                    {
+                        world.setBlock(x, y, z, stack.getFluid().getBlock());
+                    }
                     return consumeBucket(itemstack, player, new ItemStack(this, 1, itemstack.getItemDamage()));
                 }
             }
