@@ -8,7 +8,6 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
-import com.builtbroken.woodenrails.cart.EntityEmptyWoodenCart;
 import com.builtbroken.woodenrails.cart.ItemWoodenCart;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;

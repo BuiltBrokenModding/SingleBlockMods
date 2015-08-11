@@ -80,10 +80,11 @@ public class ItemWoodenCart extends Item
 
     public static EntityWoodenCart createNewCart(World world, ItemStack itemStack)
     {
-        switch (itemStack.getItemDamage())
+        EntityWoodenCart cart = new EntityWoodenCart(world);
+        if (itemStack.getItemDamage() >= 0 && itemStack.getItemDamage() < EnumCartTypes.values().length)
         {
-
+            cart.setCartType(EnumCartTypes.values()[itemStack.getItemDamage()]);
         }
-        return new EntityEmptyWoodenCart(world);
+        return cart;
     }
 }
