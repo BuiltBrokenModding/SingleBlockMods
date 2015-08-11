@@ -1,6 +1,10 @@
 package com.builtbroken.woodenrails;
 
+import com.builtbroken.woodenrails.cart.ColoredChestCartRecipe;
+import com.builtbroken.woodenrails.cart.EntityWoodenCart;
+import com.builtbroken.woodenrails.cart.ItemWoodenCart;
 import com.builtbroken.woodenrails.rail.BlockWoodrails;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
@@ -8,7 +12,6 @@ import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
-import com.builtbroken.woodenrails.cart.ItemWoodenCart;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
@@ -18,6 +21,7 @@ import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
 import java.io.File;
 
 /**
@@ -49,8 +53,8 @@ public class WoodenRails
             itemWoodCart = new ItemWoodenCart();
             GameRegistry.registerItem(itemWoodCart, "wrWoodenCart", DOMAIN);
 
-            EntityRegistry.registerGlobalEntityID(EntityEmptyWoodenCart.class, "wrEmptyCart", EntityRegistry.findGlobalUniqueEntityId());
-            EntityRegistry.registerModEntity(EntityEmptyWoodenCart.class, "wrEmptyCart", config.getInt("EmptyCart", "EntityIDs", ENTITY_ID_PREFIX, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
+            EntityRegistry.registerGlobalEntityID(EntityWoodenCart.class, "wrEmptyCart", EntityRegistry.findGlobalUniqueEntityId());
+            EntityRegistry.registerModEntity(EntityWoodenCart.class, "wrEmptyCart", config.getInt("EmptyCart", "EntityIDs", ENTITY_ID_PREFIX, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
         }
         if (config.getBoolean("EnableRail", Configuration.CATEGORY_GENERAL, true, "Allows disabling the wooden rail item and block"))
         {
@@ -74,11 +78,42 @@ public class WoodenRails
         {
             //TODO ensure/add ore dictionary support
             GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart), "psp", " b ", "psp", 'b', Items.boat, 's', Items.stick, 'p', Blocks.planks);
+            if (Loader.isModLoaded("coloredchests"))
+            {
+                try
+                {
+                    Block blockChest = (Block) Block.blockRegistry.getObject("coloredchests:coloredChest");
+                    GameRegistry.addRecipe(new ColoredChestCartRecipe(blockChest));
+                } catch (Exception e)
+                {
+                    LOGGER.error("Failed to load Colored Chest support");
+                    ((ItemWoodenCart) itemWoodCart).enableColoredChestSupport = false;
+                    e.printStackTrace();
+                }
+            }
         }
         if (blockRail != null)
         {
             GameRegistry.addShapedRecipe(new ItemStack(blockRail, 16, 0), "ptp", "psp", "ptp", 's', Items.stick, 'p', Blocks.planks, 't', Blocks.sapling);
         }
         proxy.postInit();
+    }
+
+    public static Color getColor(int rgb)
+    {
+        return new Color((rgb >> 16) & 0xFF, (rgb >> 8) & 0xFF, rgb & 0xFF);
+    }
+
+    public static int getRGB(Color color)
+    {
+        int rgb = color.getRed();
+        rgb = (rgb << 8) + color.getGreen();
+        rgb = (rgb << 8) + color.getBlue();
+        return rgb;
+    }
+
+    public static boolean doColorsMatch(Color a, Color b)
+    {
+        return a == b || a != null && b != null && a.getRGB() == b.getRGB();
     }
 }

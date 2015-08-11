@@ -8,5 +8,7 @@ public enum EnumCartTypes
     EMPTY,
     CHEST,
     COLORED_CHEST,
-    WORKTABLE;
+    WORKTABLE,
+    FURNACE,
+    HOPPER;
 }

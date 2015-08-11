@@ -1,3 +1,8 @@
 item.woodenrails:WoodenCart.name=Wooden Cart
+item.woodenrails:WoodenCart.empty.name=Wooden Cart
+item.woodenrails:WoodenCart.chest.name=Wooden Storage Cart
+item.woodenrails:WoodenCart.colored_chest.name=Wooden Storage Cart
+item.woodenrails:WoodenCart.worktable.name=Workbench Wooden Cart
+item.woodenrails:WoodenCart.furnace.name=Powered Wooden Cart
 entity.wrEmptyCart.name=Wooden Cart
 tile.woodenrails:woodenRail.name=Wooden Rail

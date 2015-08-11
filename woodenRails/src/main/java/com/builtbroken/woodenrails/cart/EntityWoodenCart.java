@@ -4,24 +4,33 @@ import com.builtbroken.woodenrails.WoodenRails;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecart;
-import net.minecraft.entity.item.EntityMinecartChest;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
 
 /**
  * Created by Dark on 7/25/2015.
  */
 public class EntityWoodenCart extends EntityMinecart implements IInventory
 {
+    //Inventory cart data
     private boolean dropContentsWhenDead = true;
     private ItemStack[] inventoryArray;
+
+    //Furnace cart data
+    private int fuel;
+    public double pushX;
+    public double pushZ;
 
     //TODO add fire damage to cart
     //TODO reduce max speed
@@ -39,19 +48,47 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
     }
 
     @Override
+    public void onUpdate()
+    {
+        super.onUpdate();
+
+        if (getCartType() == EnumCartTypes.FURNACE)
+        {
+            if (this.fuel > 0)
+            {
+                --this.fuel;
+            }
+
+            if (this.fuel <= 0)
+            {
+                this.pushX = this.pushZ = 0.0D;
+            }
+
+            this.setMinecartPowered(this.fuel > 0);
+
+            if (this.isMinecartPowered() && this.rand.nextInt(4) == 0)
+            {
+                this.worldObj.spawnParticle("largesmoke", this.posX, this.posY + 0.8D, this.posZ, 0.0D, 0.0D, 0.0D);
+            }
+        }
+    }
+
+    @Override
     public boolean interactFirst(EntityPlayer player)
     {
-        if (net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.entity.minecart.MinecartInteractEvent(this, player)))
+        if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, player)))
             return true;
         if (getCartType() == EnumCartTypes.EMPTY)
         {
             if (this.riddenByEntity != null && this.riddenByEntity instanceof EntityPlayer && this.riddenByEntity != player)
             {
                 return true;
-            } else if (this.riddenByEntity != null && this.riddenByEntity != player)
+            }
+            else if (this.riddenByEntity != null && this.riddenByEntity != player)
             {
                 return false;
-            } else
+            }
+            else
             {
                 if (!this.worldObj.isRemote)
                 {
@@ -60,20 +97,71 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
 
                 return true;
             }
-        } else if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
+        }
+        else if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
         {
             if (!this.worldObj.isRemote)
             {
                 player.displayGUIChest(this);
             }
+            return true;
+        }
+        else if (getCartType() == EnumCartTypes.FURNACE)
+        {
+            ItemStack itemstack = player.inventory.getCurrentItem();
+
+            if (itemstack != null && itemstack.getItem() == Items.coal)
+            {
+                if (!player.capabilities.isCreativeMode && --itemstack.stackSize == 0)
+                {
+                    player.inventory.setInventorySlotContents(player.inventory.currentItem, null);
+                }
+
+                this.fuel += 3600;
+            }
+
+            this.pushX = this.posX - player.posX;
+            this.pushZ = this.posZ - player.posZ;
+            return true;
         }
         return false;
     }
 
     @Override
+    protected void func_145821_a(int p_145821_1_, int p_145821_2_, int p_145821_3_, double p_145821_4_, double p_145821_6_, Block p_145821_8_, int p_145821_9_)
+    {
+        super.func_145821_a(p_145821_1_, p_145821_2_, p_145821_3_, p_145821_4_, p_145821_6_, p_145821_8_, p_145821_9_);
+        double d2 = this.pushX * this.pushX + this.pushZ * this.pushZ;
+
+        if (d2 > 1.0E-4D && this.motionX * this.motionX + this.motionZ * this.motionZ > 0.001D)
+        {
+            d2 = (double) MathHelper.sqrt_double(d2);
+            this.pushX /= d2;
+            this.pushZ /= d2;
+
+            if (this.pushX * this.motionX + this.pushZ * this.motionZ < 0.0D)
+            {
+                this.pushX = 0.0D;
+                this.pushZ = 0.0D;
+            }
+            else
+            {
+                this.pushX = this.motionX;
+                this.pushZ = this.motionZ;
+            }
+        }
+    }
+
+    @Override
     public ItemStack getCartItem()
     {
-        return new ItemStack(WoodenRails.itemWoodCart, 1, getCartType().ordinal());
+        ItemStack stack = new ItemStack(WoodenRails.itemWoodCart, 1, getCartType().ordinal());
+        if (getBlockRenderColor() != -1)
+        {
+            stack.setTagCompound(new NBTTagCompound());
+            stack.getTagCompound().setInteger("rgb", getBlockRenderColor());
+        }
+        return stack;
     }
 
     @Override
@@ -106,19 +194,44 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
                 this.motionX *= 0.7;
                 this.motionY *= 0.0D;
                 this.motionZ *= 0.7;
-            } else
+            }
+            else
             {
                 this.motionX *= 0.8;
                 this.motionY *= 0.0D;
                 this.motionZ *= 0.8;
             }
-        } else if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
+        }
+        else if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
         {
             int i = 15 - Container.calcRedstoneFromInventory(this);
             float f = 0.98F + (float) i * 0.001F;
             this.motionX *= (double) f;
             this.motionY *= 0.0D;
             this.motionZ *= (double) f;
+        }
+        else if (getCartType() == EnumCartTypes.FURNACE)
+        {
+            double d0 = this.pushX * this.pushX + this.pushZ * this.pushZ;
+
+            if (d0 > 1.0E-4D)
+            {
+                d0 = (double) MathHelper.sqrt_double(d0);
+                this.pushX /= d0;
+                this.pushZ /= d0;
+                double d1 = 0.05D;
+                this.motionX *= 0.800000011920929D;
+                this.motionY *= 0.0D;
+                this.motionZ *= 0.800000011920929D;
+                this.motionX += this.pushX * d1;
+                this.motionZ += this.pushZ * d1;
+            }
+            else
+            {
+                this.motionX *= 0.9800000190734863D;
+                this.motionY *= 0.0D;
+                this.motionZ *= 0.9800000190734863D;
+            }
         }
     }
 
@@ -137,12 +250,25 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
     @Override
     protected void entityInit()
     {
-        this.dataWatcher.addObject(22, Byte.valueOf((byte) 0));
+        super.entityInit();
+        this.dataWatcher.addObject(16, new Byte((byte) 0));
+        this.dataWatcher.addObject(23, Byte.valueOf((byte) 0));
+        this.dataWatcher.addObject(24, Integer.valueOf(-1));
+    }
+
+    public void setBlockRenderColor(int color)
+    {
+        this.dataWatcher.updateObject(24, Integer.valueOf(color));
+    }
+
+    public int getBlockRenderColor()
+    {
+        return this.dataWatcher.getWatchableObjectInt(24);
     }
 
     public EnumCartTypes getCartType()
     {
-        byte type = this.dataWatcher.getWatchableObjectByte(22);
+        byte type = this.dataWatcher.getWatchableObjectByte(23);
         if (type >= 0 && type < EnumCartTypes.values().length)
             return EnumCartTypes.values()[type];
         return EnumCartTypes.EMPTY;
@@ -150,7 +276,24 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
 
     public void setCartType(EnumCartTypes type)
     {
-        this.dataWatcher.updateObject(22, (byte) type.ordinal());
+        this.dataWatcher.updateObject(23, Byte.valueOf((byte) type.ordinal()));
+    }
+
+    protected boolean isMinecartPowered()
+    {
+        return (this.dataWatcher.getWatchableObjectByte(16) & 1) != 0;
+    }
+
+    protected void setMinecartPowered(boolean p_94107_1_)
+    {
+        if (p_94107_1_)
+        {
+            this.dataWatcher.updateObject(16, Byte.valueOf((byte) (this.dataWatcher.getWatchableObjectByte(16) | 1)));
+        }
+        else
+        {
+            this.dataWatcher.updateObject(16, Byte.valueOf((byte) (this.dataWatcher.getWatchableObjectByte(16) & -2)));
+        }
     }
 
     private ItemStack getContentsOfSlot(int slot)
@@ -168,9 +311,17 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
     protected void readEntityFromNBT(NBTTagCompound nbt)
     {
         super.readEntityFromNBT(nbt);
+
+        //Read block render color
+        if (nbt.hasKey("blockRenderColor"))
+            setBlockRenderColor(nbt.getInteger("blockRenderColor"));
+
+        //Read cart type
         byte b = nbt.getByte("cartType");
         if (b >= 0 && b < EnumCartTypes.values().length)
             setCartType(EnumCartTypes.values()[b]);
+
+        //Load data for each cart type
         if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
         {
             NBTTagList nbttaglist = nbt.getTagList("Items", 10);
@@ -187,6 +338,12 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
                 }
             }
         }
+        else if (getCartType() == EnumCartTypes.FURNACE)
+        {
+            this.pushX = nbt.getDouble("PushX");
+            this.pushZ = nbt.getDouble("PushZ");
+            this.fuel = nbt.getShort("Fuel");
+        }
     }
 
     @Override
@@ -195,6 +352,10 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
         super.writeEntityToNBT(nbt);
         nbt.setByte("cartType", (byte) getCartType().ordinal());
 
+        if (getBlockRenderColor() != -1)
+        {
+            nbt.setInteger("blockRenderColor", getBlockRenderColor());
+        }
         if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
         {
             NBTTagList nbttaglist = new NBTTagList();
@@ -211,6 +372,12 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
             }
 
             nbt.setTag("Items", nbttaglist);
+        }
+        else if (getCartType() == EnumCartTypes.FURNACE)
+        {
+            nbt.setDouble("PushX", this.pushX);
+            nbt.setDouble("PushZ", this.pushZ);
+            nbt.setShort("Fuel", (short) this.fuel);
         }
     }
 
@@ -232,7 +399,8 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
                 itemstack = this.getStackInSlot(slot);
                 this.setInventorySlotContents(slot, null);
                 return itemstack;
-            } else
+            }
+            else
             {
                 itemstack = this.getStackInSlot(slot).splitStack(p_70298_2_);
 
@@ -243,7 +411,8 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
 
                 return itemstack;
             }
-        } else
+        }
+        else
         {
             return null;
         }
@@ -257,7 +426,8 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
             ItemStack itemstack = this.getStackInSlot(slot);
             this.setInventorySlotContents(slot, null);
             return itemstack;
-        } else
+        }
+        else
         {
             return null;
         }
@@ -372,12 +542,24 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
     {
         if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
             return Blocks.chest;
-        return null;
+        else if (getCartType() == EnumCartTypes.FURNACE)
+            return Blocks.lit_furnace;
+        return Blocks.air;
     }
 
     @Override
     public int getDefaultDisplayTileOffset()
     {
-        return 8;
+        if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
+            return 8;
+        return 6;
+    }
+
+    @Override
+    public int getDefaultDisplayTileData()
+    {
+        if (getCartType() == EnumCartTypes.FURNACE)
+            return 2;
+        return 0;
     }
 }

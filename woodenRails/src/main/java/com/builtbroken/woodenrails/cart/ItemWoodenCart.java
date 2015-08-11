@@ -1,6 +1,7 @@
 package com.builtbroken.woodenrails.cart;
 
 import com.builtbroken.woodenrails.WoodenRails;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.BlockDispenser;
@@ -9,10 +10,13 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemDye;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
 
+import java.awt.*;
 import java.util.List;
 
 /**
@@ -21,14 +25,27 @@ import java.util.List;
 public class ItemWoodenCart extends Item
 {
     @SideOnly(Side.CLIENT)
-    public static IIcon furnaceMinecraft;
+    public IIcon furnaceMinecraft;
+
+    @SideOnly(Side.CLIENT)
+    public IIcon hopperMinecraft;
+
+    @SideOnly(Side.CLIENT)
+    public IIcon chestMinecraft;
+
+    @SideOnly(Side.CLIENT)
+    public IIcon tntMinecraft;
+
+    public boolean enableColoredChestSupport;
 
     public ItemWoodenCart()
     {
-        this.maxStackSize = 3;
+        this.setMaxStackSize(3);
+        this.setHasSubtypes(true);
         this.setUnlocalizedName(WoodenRails.PREFIX + "WoodenCart");
         this.setCreativeTab(CreativeTabs.tabTransport);
         BlockDispenser.dispenseBehaviorRegistry.putObject(this, new DispenserMinecartBehavior());
+        enableColoredChestSupport = Loader.isModLoaded("coloredchests");
     }
 
     @Override
@@ -58,9 +75,71 @@ public class ItemWoodenCart extends Item
 
     @SideOnly(Side.CLIENT)
     @Override
-    public IIcon getIconFromDamage(int meta)
+    public void addInformation(ItemStack stack, EntityPlayer player, List list, boolean b)
     {
+        if (stack.getItemDamage() >= 0 && stack.getItemDamage() < EnumCartTypes.values().length)
+        {
+            EnumCartTypes type = EnumCartTypes.values()[stack.getItemDamage()];
+            if (type == EnumCartTypes.HOPPER || type == EnumCartTypes.HOPPER || type == EnumCartTypes.WORKTABLE)
+                list.add("Not implemented");
+        }
+        if (stack != null && stack.getTagCompound() != null)
+        {
+            if (stack.getTagCompound().hasKey("rgb"))
+            {
+                Color color = WoodenRails.getColor(stack.getTagCompound().getInteger("rgb"));
+                list.add("R: " + color.getRed() + " G: " + color.getGreen() + " B: " + color.getBlue());
+            }
+
+            if (stack.getTagCompound().hasKey("colorName"))
+            {
+                list.add("N: " + stack.getTagCompound().getString("colorName"));
+            }
+        }
+    }
+
+    @SideOnly(Side.CLIENT)
+    @Override
+    public IIcon getIconFromDamageForRenderPass(int meta, int pass)
+    {
+        if (pass == 1 && meta >= 0 && meta < EnumCartTypes.values().length)
+        {
+            switch (EnumCartTypes.values()[meta])
+            {
+                case FURNACE:
+                    return this.furnaceMinecraft;
+                case COLORED_CHEST:
+                case CHEST:
+                    return this.chestMinecraft;
+                case HOPPER:
+                    return this.hopperMinecraft;
+            }
+        }
         return this.itemIcon;
+    }
+
+    @Override
+    @SideOnly(Side.CLIENT)
+    public int getColorFromItemStack(ItemStack stack, int pass)
+    {
+        if (pass == 1 && stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
+        {
+            return stack.getTagCompound().getInteger("rgb");
+        }
+        return 16777215;
+    }
+
+    @Override
+    public int getRenderPasses(int metadata)
+    {
+        return metadata != 0 ? 2 : 1;
+    }
+
+
+    @SideOnly(Side.CLIENT)
+    public boolean requiresMultipleRenderPasses()
+    {
+        return true;
     }
 
     @SideOnly(Side.CLIENT)
@@ -69,13 +148,44 @@ public class ItemWoodenCart extends Item
     {
         this.itemIcon = reg.registerIcon(WoodenRails.PREFIX + "minecart_normal");
         this.furnaceMinecraft = reg.registerIcon(WoodenRails.PREFIX + "minecart_furnace");
+        this.chestMinecraft = reg.registerIcon(WoodenRails.PREFIX + "minecart_chest");
+        this.hopperMinecraft = reg.registerIcon(WoodenRails.PREFIX + "minecart_hopper");
+        this.tntMinecraft = reg.registerIcon(WoodenRails.PREFIX + "minecart_tnt");
+    }
+
+    @Override
+    public String getUnlocalizedName(ItemStack itemStack)
+    {
+        EnumCartTypes type = EnumCartTypes.EMPTY;
+        if (itemStack.getItemDamage() >= 0 && itemStack.getItemDamage() < EnumCartTypes.values().length)
+        {
+            type = EnumCartTypes.values()[itemStack.getItemDamage()];
+        }
+        return getUnlocalizedName() + "." + type.name().toLowerCase();
     }
 
     @SideOnly(Side.CLIENT)
     @Override
     public void getSubItems(Item item, CreativeTabs tab, List items)
     {
-        items.add(new ItemStack(item, 1, 0));
+        for (EnumCartTypes type : EnumCartTypes.values())
+        {
+            if (type != EnumCartTypes.COLORED_CHEST)
+            {
+                items.add(new ItemStack(item, 1, type.ordinal()));
+            }
+            else if (enableColoredChestSupport)
+            {
+                for (int i = 0; i < ItemDye.field_150922_c.length; i++)
+                {
+                    ItemStack stack = new ItemStack(item, 1, type.ordinal());
+                    stack.setTagCompound(new NBTTagCompound());
+                    stack.getTagCompound().setInteger("rgb", ItemDye.field_150922_c[i]);
+                    stack.getTagCompound().setString("colorName", ItemDye.field_150921_b[i]);
+                    items.add(stack);
+                }
+            }
+        }
     }
 
     public static EntityWoodenCart createNewCart(World world, ItemStack itemStack)
@@ -83,7 +193,12 @@ public class ItemWoodenCart extends Item
         EntityWoodenCart cart = new EntityWoodenCart(world);
         if (itemStack.getItemDamage() >= 0 && itemStack.getItemDamage() < EnumCartTypes.values().length)
         {
-            cart.setCartType(EnumCartTypes.values()[itemStack.getItemDamage()]);
+            EnumCartTypes type = EnumCartTypes.values()[itemStack.getItemDamage()];
+            cart.setCartType(type);
+            if (itemStack.getTagCompound() != null && itemStack.getTagCompound().hasKey("rgb"))
+            {
+                cart.setBlockRenderColor(itemStack.getTagCompound().getInteger("rgb"));
+            }
         }
         return cart;
     }
