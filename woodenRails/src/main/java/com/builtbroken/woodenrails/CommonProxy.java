@@ -6,6 +6,7 @@ import cpw.mods.fml.common.network.IGuiHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ContainerHopper;
+import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.world.World;
 
@@ -39,6 +40,10 @@ public class CommonProxy implements IGuiHandler
                 return new ContainerHopper(player.inventory, (IInventory) entity);
             else
                 WoodenRails.LOGGER.error("Unknown entity[" + x + "," + entity + "] attempted to open a Hopper Gui ");
+        }
+        else if (ID == 1)
+        {
+            return new ContainerWorkbench(player.inventory, world, (int) player.posX, (int) player.posY, (int) player.posZ);
         }
         else
         {

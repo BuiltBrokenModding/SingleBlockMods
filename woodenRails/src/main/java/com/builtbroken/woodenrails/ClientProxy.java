@@ -5,6 +5,7 @@ import com.builtbroken.woodenrails.cart.EnumCartTypes;
 import com.builtbroken.woodenrails.cart.RenderWoodenCart;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import net.minecraft.client.gui.GuiHopper;
+import net.minecraft.client.gui.inventory.GuiCrafting;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
@@ -36,6 +37,10 @@ public class ClientProxy extends CommonProxy
                 return new GuiHopper(player.inventory, (IInventory) entity);
             else
                 WoodenRails.LOGGER.error("Unknown entity[" + x + "," + entity + "] attempted to open a Hopper Gui ");
+        }
+        else if (ID == 1)
+        {
+            return new GuiCrafting(player.inventory, world, (int) player.posX, (int) player.posY, (int) player.posZ);
         }
         else
         {
