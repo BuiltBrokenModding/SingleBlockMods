@@ -1,7 +1,12 @@
 package com.builtbroken.woodenrails;
 
+import com.builtbroken.woodenrails.cart.EntityWoodenCart;
+import com.builtbroken.woodenrails.cart.EnumCartTypes;
 import cpw.mods.fml.common.network.IGuiHandler;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ContainerHopper;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.world.World;
 
 /**
@@ -27,6 +32,18 @@ public class CommonProxy implements IGuiHandler
     @Override
     public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z)
     {
+        if (ID == 0)
+        {
+            Entity entity = world.getEntityByID(x);
+            if (entity instanceof EntityWoodenCart && ((EntityWoodenCart) entity).getCartType() == EnumCartTypes.HOPPER)
+                return new ContainerHopper(player.inventory, (IInventory) entity);
+            else
+                WoodenRails.LOGGER.error("Unknown entity[" + x + "," + entity + "] attempted to open a Hopper Gui ");
+        }
+        else
+        {
+            WoodenRails.LOGGER.error("Unknown Gui ID " + ID + " was opened at Dim@" + world.provider.dimensionId + " " + x + "x " + y + "y " + z + "z ");
+        }
         return null;
     }
 

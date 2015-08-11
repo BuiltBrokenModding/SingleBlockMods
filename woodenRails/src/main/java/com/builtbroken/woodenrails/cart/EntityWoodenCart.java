@@ -1,7 +1,11 @@
 package com.builtbroken.woodenrails.cart;
 
 import com.builtbroken.woodenrails.WoodenRails;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRailBase;
+import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,16 +16,21 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.IHopper;
+import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.minecart.MinecartInteractEvent;
 
+import java.util.List;
+
 /**
  * Created by Dark on 7/25/2015.
  */
-public class EntityWoodenCart extends EntityMinecart implements IInventory
+public class EntityWoodenCart extends EntityMinecart implements IInventory, IHopper
 {
     //Inventory cart data
     private boolean dropContentsWhenDead = true;
@@ -31,6 +40,13 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
     private int fuel;
     public double pushX;
     public double pushZ;
+
+    //TNT data
+    private int minecartTNTFuse = -1;
+
+    //Hopper cart data
+    private boolean isBlocked = true;
+    private int transferTicker = -1;
 
     //TODO add fire damage to cart
     //TODO reduce max speed
@@ -71,6 +87,85 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
                 this.worldObj.spawnParticle("largesmoke", this.posX, this.posY + 0.8D, this.posZ, 0.0D, 0.0D, 0.0D);
             }
         }
+        else if (getCartType() == EnumCartTypes.BC_TANK)
+        {
+            //TODO if fluid is hot burn up cart slowly
+        }
+        else if (getCartType() == EnumCartTypes.TNT)
+        {
+            if (this.minecartTNTFuse > 0)
+            {
+                --this.minecartTNTFuse;
+                this.worldObj.spawnParticle("smoke", this.posX, this.posY + 0.5D, this.posZ, 0.0D, 0.0D, 0.0D);
+            }
+            else if (this.minecartTNTFuse == 0)
+            {
+                this.explodeCart(this.motionX * this.motionX + this.motionZ * this.motionZ);
+            }
+
+            if (this.isCollidedHorizontally)
+            {
+                double d0 = this.motionX * this.motionX + this.motionZ * this.motionZ;
+
+                if (d0 >= 0.009999999776482582D)
+                {
+                    this.explodeCart(d0);
+                }
+            }
+        }
+        else if (getCartType() == EnumCartTypes.HOPPER)
+        {
+            if (!this.worldObj.isRemote && this.isEntityAlive() && this.getBlocked())
+            {
+                --this.transferTicker;
+
+                if (!this.canTransfer())
+                {
+                    this.setTransferTicker(0);
+
+                    if (this.transferItems())
+                    {
+                        this.setTransferTicker(4);
+                        this.markDirty();
+                    }
+                }
+            }
+        }
+    }
+
+    public boolean transferItems()
+    {
+        if (TileEntityHopper.func_145891_a(this))
+        {
+            return true;
+        }
+        else
+        {
+            List list = this.worldObj.selectEntitiesWithinAABB(EntityItem.class, this.boundingBox.expand(0.25D, 0.0D, 0.25D), IEntitySelector.selectAnything);
+
+            if (list.size() > 0)
+            {
+                TileEntityHopper.func_145898_a(this, (EntityItem) list.get(0));
+            }
+
+            return false;
+        }
+    }
+
+    /**
+     * Sets the transfer ticker, used to determine the delay between transfers.
+     */
+    public void setTransferTicker(int p_98042_1_)
+    {
+        this.transferTicker = p_98042_1_;
+    }
+
+    /**
+     * Returns whether the hopper cart can currently transfer an item.
+     */
+    public boolean canTransfer()
+    {
+        return this.transferTicker > 0;
     }
 
     @Override
@@ -124,6 +219,14 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
             this.pushZ = this.posZ - player.posZ;
             return true;
         }
+        else if (getCartType() == EnumCartTypes.HOPPER)
+        {
+            if (!this.worldObj.isRemote)
+            {
+                player.openGui(WoodenRails.INSTANCE, 0, worldObj, getEntityId(), 0, 0);
+            }
+            return true;
+        }
         return false;
     }
 
@@ -174,14 +277,18 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
     public void killMinecart(DamageSource p_94095_1_)
     {
         this.setDead();
-        ItemStack cartStack = new ItemStack(WoodenRails.itemWoodCart);
-        /** TODO re-add after creating an access transformer
-         if (this.entityName != null)
-         {
-         itemstack.setStackDisplayName(this.entityName);
-         }
-         */
-        this.entityDropItem(cartStack, 0.0F);
+
+        double d0 = this.motionX * this.motionX + this.motionZ * this.motionZ;
+
+        if (!p_94095_1_.isExplosion())
+        {
+            this.entityDropItem(getCartItem(), 0.0F);
+        }
+
+        if (p_94095_1_.isFireDamage() || p_94095_1_.isExplosion() || d0 >= 0.009999999776482582D)
+        {
+            this.explodeCart(d0);
+        }
     }
 
 
@@ -243,6 +350,8 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
             case CHEST:
             case COLORED_CHEST:
                 return 1;
+            case HOPPER:
+                return 5;
         }
         return 0;
     }
@@ -298,11 +407,14 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
 
     private ItemStack getContentsOfSlot(int slot)
     {
-        if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
+        if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST || getCartType() == EnumCartTypes.HOPPER)
         {
-            if (inventoryArray == null)
-                inventoryArray = new ItemStack[36];
-            return inventoryArray[slot];
+            if (slot >= 0 && slot < getSizeInventory())
+            {
+                if (inventoryArray == null)
+                    inventoryArray = new ItemStack[getSizeInventory()];
+                return inventoryArray[slot];
+            }
         }
         return null;
     }
@@ -322,7 +434,7 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
             setCartType(EnumCartTypes.values()[b]);
 
         //Load data for each cart type
-        if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
+        if (this.getSizeInventory() > 0)
         {
             NBTTagList nbttaglist = nbt.getTagList("Items", 10);
             this.inventoryArray = new ItemStack[this.getSizeInventory()];
@@ -338,11 +450,23 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
                 }
             }
         }
-        else if (getCartType() == EnumCartTypes.FURNACE)
+
+        if (getCartType() == EnumCartTypes.FURNACE)
         {
             this.pushX = nbt.getDouble("PushX");
             this.pushZ = nbt.getDouble("PushZ");
             this.fuel = nbt.getShort("Fuel");
+        }
+        else if (getCartType() == EnumCartTypes.TNT)
+        {
+            if (nbt.hasKey("TNTFuse", 99))
+            {
+                this.minecartTNTFuse = nbt.getInteger("TNTFuse");
+            }
+        }
+        else if (getCartType() == EnumCartTypes.HOPPER)
+        {
+            this.transferTicker = nbt.getInteger("TransferCooldown");
         }
     }
 
@@ -356,7 +480,7 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
         {
             nbt.setInteger("blockRenderColor", getBlockRenderColor());
         }
-        if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
+        if (this.getSizeInventory() > 0)
         {
             NBTTagList nbttaglist = new NBTTagList();
 
@@ -373,11 +497,20 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
 
             nbt.setTag("Items", nbttaglist);
         }
-        else if (getCartType() == EnumCartTypes.FURNACE)
+
+        if (getCartType() == EnumCartTypes.FURNACE)
         {
             nbt.setDouble("PushX", this.pushX);
             nbt.setDouble("PushZ", this.pushZ);
             nbt.setShort("Fuel", (short) this.fuel);
+        }
+        else if (getCartType() == EnumCartTypes.TNT)
+        {
+            nbt.setInteger("TNTFuse", this.minecartTNTFuse);
+        }
+        else if (getCartType() == EnumCartTypes.HOPPER)
+        {
+            nbt.setInteger("TransferCooldown", this.transferTicker);
         }
     }
 
@@ -436,6 +569,8 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
     @Override
     public void setInventorySlotContents(int slot, ItemStack stack)
     {
+        if (this.inventoryArray == null)
+            this.inventoryArray = new ItemStack[getSizeInventory()];
         this.inventoryArray[slot] = stack;
 
         if (stack != null && stack.stackSize > this.getInventoryStackLimit())
@@ -534,6 +669,8 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
     {
         if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
             return 27;
+        else if (getCartType() == EnumCartTypes.HOPPER)
+            return 5;
         return 0;
     }
 
@@ -544,6 +681,10 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
             return Blocks.chest;
         else if (getCartType() == EnumCartTypes.FURNACE)
             return Blocks.lit_furnace;
+        else if (getCartType() == EnumCartTypes.TNT)
+            return Blocks.tnt;
+        else if (getCartType() == EnumCartTypes.HOPPER)
+            return Blocks.hopper;
         return Blocks.air;
     }
 
@@ -552,6 +693,8 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
     {
         if (getCartType() == EnumCartTypes.CHEST || getCartType() == EnumCartTypes.COLORED_CHEST)
             return 8;
+        else if (getCartType() == EnumCartTypes.HOPPER)
+            return 1;
         return 6;
     }
 
@@ -561,5 +704,144 @@ public class EntityWoodenCart extends EntityMinecart implements IInventory
         if (getCartType() == EnumCartTypes.FURNACE)
             return 2;
         return 0;
+    }
+
+    /**
+     * Makes the minecart explode.
+     */
+    protected void explodeCart(double p_94103_1_)
+    {
+        if (!this.worldObj.isRemote && getCartType() == EnumCartTypes.TNT)
+        {
+            double d1 = Math.sqrt(p_94103_1_);
+
+            if (d1 > 5.0D)
+            {
+                d1 = 5.0D;
+            }
+
+            this.worldObj.createExplosion(this, this.posX, this.posY, this.posZ, (float) (4.0D + this.rand.nextDouble() * 1.5D * d1), true);
+            this.setDead();
+        }
+    }
+
+    @Override
+    protected void fall(float p_70069_1_)
+    {
+        if (getCartType() == EnumCartTypes.TNT && p_70069_1_ >= 3.0F)
+        {
+            float f1 = p_70069_1_ / 10.0F;
+            this.explodeCart((double) (f1 * f1));
+        }
+
+        super.fall(p_70069_1_);
+    }
+
+    @Override
+    public void onActivatorRailPass(int p_96095_1_, int p_96095_2_, int p_96095_3_, boolean p_96095_4_)
+    {
+        if (getCartType() == EnumCartTypes.TNT && p_96095_4_ && this.minecartTNTFuse < 0)
+        {
+            this.ignite();
+        }
+        else if (getCartType() == EnumCartTypes.HOPPER)
+        {
+            boolean flag1 = !p_96095_4_;
+
+            if (flag1 != this.getBlocked())
+            {
+                this.setBlocked(flag1);
+            }
+        }
+    }
+
+    /**
+     * Get whether this hopper minecart is being blocked by an activator rail.
+     */
+    public boolean getBlocked()
+    {
+        return this.isBlocked;
+    }
+
+    /**
+     * Set whether this hopper minecart is being blocked by an activator rail.
+     */
+    public void setBlocked(boolean p_96110_1_)
+    {
+        this.isBlocked = p_96110_1_;
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void handleHealthUpdate(byte p_70103_1_)
+    {
+        if (getCartType() == EnumCartTypes.TNT && p_70103_1_ == 10)
+        {
+            this.ignite();
+        }
+        else
+        {
+            super.handleHealthUpdate(p_70103_1_);
+        }
+    }
+
+    /**
+     * Ignites this TNT cart.
+     */
+    public void ignite()
+    {
+        if (getCartType() == EnumCartTypes.TNT)
+        {
+            this.minecartTNTFuse = 80;
+
+            if (!this.worldObj.isRemote)
+            {
+                this.worldObj.setEntityState(this, (byte) 10);
+                this.worldObj.playSoundAtEntity(this, "game.tnt.primed", 1.0F, 1.0F);
+            }
+        }
+    }
+
+    /**
+     * Returns true if the TNT minecart is ignited.
+     */
+    public boolean isIgnited()
+    {
+        return getCartType() == EnumCartTypes.TNT && this.minecartTNTFuse > -1;
+    }
+
+    @Override
+    public float func_145772_a(Explosion p_145772_1_, World p_145772_2_, int p_145772_3_, int p_145772_4_, int p_145772_5_, Block p_145772_6_)
+    {
+        return this.isIgnited() && (BlockRailBase.func_150051_a(p_145772_6_) || BlockRailBase.func_150049_b_(p_145772_2_, p_145772_3_, p_145772_4_ + 1, p_145772_5_)) ? 0.0F : super.func_145772_a(p_145772_1_, p_145772_2_, p_145772_3_, p_145772_4_, p_145772_5_, p_145772_6_);
+    }
+
+    @Override
+    public boolean func_145774_a(Explosion p_145774_1_, World p_145774_2_, int p_145774_3_, int p_145774_4_, int p_145774_5_, Block p_145774_6_, float p_145774_7_)
+    {
+        return this.isIgnited() && (BlockRailBase.func_150051_a(p_145774_6_) || BlockRailBase.func_150049_b_(p_145774_2_, p_145774_3_, p_145774_4_ + 1, p_145774_5_)) ? false : super.func_145774_a(p_145774_1_, p_145774_2_, p_145774_3_, p_145774_4_, p_145774_5_, p_145774_6_, p_145774_7_);
+    }
+
+    @Override
+    public World getWorldObj()
+    {
+        return this.worldObj;
+    }
+
+    @Override
+    public double getXPos()
+    {
+        return this.posX;
+    }
+
+    @Override
+    public double getYPos()
+    {
+        return this.posY;
+    }
+
+    @Override
+    public double getZPos()
+    {
+        return this.posZ;
     }
 }

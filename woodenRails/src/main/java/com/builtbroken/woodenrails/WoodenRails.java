@@ -2,6 +2,7 @@ package com.builtbroken.woodenrails;
 
 import com.builtbroken.woodenrails.cart.ColoredChestCartRecipe;
 import com.builtbroken.woodenrails.cart.EntityWoodenCart;
+import com.builtbroken.woodenrails.cart.EnumCartTypes;
 import com.builtbroken.woodenrails.cart.ItemWoodenCart;
 import com.builtbroken.woodenrails.rail.BlockWoodrails;
 import cpw.mods.fml.common.Loader;
@@ -10,6 +11,7 @@ import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.EntityRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import net.minecraft.block.Block;
@@ -42,10 +44,14 @@ public class WoodenRails
     public static Item itemWoodCart;
     public static Block blockRail;
 
+    @Mod.Instance(DOMAIN)
+    public static WoodenRails INSTANCE;
+
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
         LOGGER = LogManager.getLogger("WoodenRails");
+        NetworkRegistry.INSTANCE.registerGuiHandler(this, proxy);
         Configuration config = new Configuration(new File(event.getModConfigurationDirectory(), "bbm/Wooden_Rails.cfg"));
         config.load();
         if (config.getBoolean("EnableCart", Configuration.CATEGORY_GENERAL, true, "Allows disabling the wooden cart item and entity"))
@@ -78,12 +84,18 @@ public class WoodenRails
         {
             //TODO ensure/add ore dictionary support
             GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart), "psp", " b ", "psp", 'b', Items.boat, 's', Items.stick, 'p', Blocks.planks);
+            GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart, 1, EnumCartTypes.FURNACE.ordinal()), "f", "c", 'f', Blocks.furnace, 'c', new ItemStack(itemWoodCart));
+            GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart, 1, EnumCartTypes.CHEST.ordinal()), "f", "c", 'f', Blocks.chest, 'c', new ItemStack(itemWoodCart));
+            GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart, 1, EnumCartTypes.HOPPER.ordinal()), "f", "c", 'f', Blocks.hopper, 'c', new ItemStack(itemWoodCart));
+            GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart, 1, EnumCartTypes.TNT.ordinal()), "f", "c", 'f', Blocks.tnt, 'c', new ItemStack(itemWoodCart));
+            GameRegistry.addShapedRecipe(new ItemStack(itemWoodCart, 1, EnumCartTypes.WORKTABLE.ordinal()), "f", "c", 'f', Blocks.crafting_table, 'c', new ItemStack(itemWoodCart));
             if (Loader.isModLoaded("coloredchests"))
             {
                 try
                 {
                     Block blockChest = (Block) Block.blockRegistry.getObject("coloredchests:coloredChest");
-                    GameRegistry.addRecipe(new ColoredChestCartRecipe(blockChest));
+                    if (blockChest != null)
+                        GameRegistry.addRecipe(new ColoredChestCartRecipe(blockChest));
                 } catch (Exception e)
                 {
                     LOGGER.error("Failed to load Colored Chest support");

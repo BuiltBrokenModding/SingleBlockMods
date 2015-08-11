@@ -10,5 +10,7 @@ public enum EnumCartTypes
     COLORED_CHEST,
     WORKTABLE,
     FURNACE,
-    HOPPER;
+    HOPPER,
+    TNT,
+    BC_TANK;
 }

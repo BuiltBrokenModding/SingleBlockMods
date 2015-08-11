@@ -36,6 +36,12 @@ public class ItemWoodenCart extends Item
     @SideOnly(Side.CLIENT)
     public IIcon tntMinecraft;
 
+    @SideOnly(Side.CLIENT)
+    public IIcon workbenchMinecraft;
+
+    @SideOnly(Side.CLIENT)
+    public IIcon bcTankMinecraft;
+
     public boolean enableColoredChestSupport;
 
     public ItemWoodenCart()
@@ -113,6 +119,12 @@ public class ItemWoodenCart extends Item
                     return this.chestMinecraft;
                 case HOPPER:
                     return this.hopperMinecraft;
+                case WORKTABLE:
+                    return this.workbenchMinecraft;
+                case TNT:
+                    return this.tntMinecraft;
+                case BC_TANK:
+                    return this.bcTankMinecraft;
             }
         }
         return this.itemIcon;
@@ -151,6 +163,8 @@ public class ItemWoodenCart extends Item
         this.chestMinecraft = reg.registerIcon(WoodenRails.PREFIX + "minecart_chest");
         this.hopperMinecraft = reg.registerIcon(WoodenRails.PREFIX + "minecart_hopper");
         this.tntMinecraft = reg.registerIcon(WoodenRails.PREFIX + "minecart_tnt");
+        this.bcTankMinecraft = reg.registerIcon(WoodenRails.PREFIX + "minecraft_bc_tank");
+        this.workbenchMinecraft = reg.registerIcon(WoodenRails.PREFIX + "minecraft_workbench");
     }
 
     @Override
