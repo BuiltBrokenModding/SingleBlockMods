@@ -1,6 +1,7 @@
 package com.builtbroken.woodenrails.cart.types;
 
 import com.builtbroken.woodenrails.WoodenRails;
+import com.builtbroken.woodenrails.cart.EnumCartTypes;
 import net.minecraft.block.Block;
 import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.item.EntityItem;
@@ -34,6 +35,12 @@ public class EntityHopperCart extends EntityContainerCart implements IHopper
     }
 
     @Override
+    public EnumCartTypes getCartType()
+    {
+        return EnumCartTypes.HOPPER;
+    }
+
+    @Override
     public int getMinecartType()
     {
         return 5;
@@ -60,7 +67,7 @@ public class EntityHopperCart extends EntityContainerCart implements IHopper
     @Override
     public boolean interactFirst(EntityPlayer player)
     {
-        if(MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, player)))
+        if (MinecraftForge.EVENT_BUS.post(new MinecartInteractEvent(this, player)))
             return true;
         if (!this.worldObj.isRemote)
         {
@@ -81,13 +88,11 @@ public class EntityHopperCart extends EntityContainerCart implements IHopper
         }
     }
 
-    @Override
     public boolean getBlocked()
     {
         return this.isBlocked;
     }
 
-    @Override
     public void setBlocked(boolean p_96110_1_)
     {
         this.isBlocked = p_96110_1_;
@@ -151,7 +156,7 @@ public class EntityHopperCart extends EntityContainerCart implements IHopper
 
             if (list.size() > 0)
             {
-                TileEntityHopper.func_145898_a(this, (EntityItem)list.get(0));
+                TileEntityHopper.func_145898_a(this, (EntityItem) list.get(0));
             }
 
             return false;
@@ -172,13 +177,11 @@ public class EntityHopperCart extends EntityContainerCart implements IHopper
         this.transferTicker = nbt.getInteger("TransferCooldown");
     }
 
-    @Override
     public void setTransferTicker(int p_98042_1_)
     {
         this.transferTicker = p_98042_1_;
     }
 
-    @Override
     public boolean canTransfer()
     {
         return this.transferTicker > 0;

@@ -1,16 +1,26 @@
 package com.builtbroken.woodenrails.cart;
 
+import com.builtbroken.woodenrails.cart.types.*;
+
 /**
  * Created by Cow Pi on 8/11/2015.
  */
 public enum EnumCartTypes
 {
-    EMPTY,
-    CHEST,
-    COLORED_CHEST,
-    WORKTABLE,
-    FURNACE,
-    HOPPER,
-    TNT,
-    BC_TANK;
+    EMPTY(EntityEmptyCart.class, "WoodenCart"),
+    CHEST(EntityChestCart.class, "ChestCart"),
+    WORKTABLE(EntityWorkbenchCart.class, "WorkbenchCart"),
+    FURNACE(EntityPoweredCart.class, "PoweredCart"),
+    HOPPER(EntityHopperCart.class, "HopperCart"),
+    TNT(EntityTNTCart.class, "TNTCart"),
+    BC_TANK(EntityBCTank.class, "BCTankCart");
+
+    public final Class<? extends EntityWoodenCart> clazz;
+    public final String entityName;
+
+    EnumCartTypes(Class<? extends EntityWoodenCart> clazz, String entityName)
+    {
+        this.clazz = clazz;
+        this.entityName = "wr" + entityName;
+    }
 }

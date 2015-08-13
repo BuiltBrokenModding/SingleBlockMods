@@ -1,6 +1,7 @@
 package com.builtbroken.woodenrails.cart;
 
 import com.builtbroken.woodenrails.WoodenRails;
+import com.builtbroken.woodenrails.cart.types.*;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -114,7 +115,6 @@ public class ItemWoodenCart extends Item
             {
                 case FURNACE:
                     return this.furnaceMinecraft;
-                case COLORED_CHEST:
                 case CHEST:
                     return this.chestMinecraft;
                 case HOPPER:
@@ -184,11 +184,8 @@ public class ItemWoodenCart extends Item
     {
         for (EnumCartTypes type : EnumCartTypes.values())
         {
-            if (type != EnumCartTypes.COLORED_CHEST)
-            {
-                items.add(new ItemStack(item, 1, type.ordinal()));
-            }
-            else if (enableColoredChestSupport)
+            items.add(new ItemStack(item, 1, type.ordinal()));
+            if (type == EnumCartTypes.CHEST && enableColoredChestSupport)
             {
                 for (int i = 0; i < ItemDye.field_150922_c.length; i++)
                 {
@@ -204,16 +201,27 @@ public class ItemWoodenCart extends Item
 
     public static EntityWoodenCart createNewCart(World world, ItemStack itemStack)
     {
-        EntityWoodenCart cart = new EntityWoodenCart(world);
         if (itemStack.getItemDamage() >= 0 && itemStack.getItemDamage() < EnumCartTypes.values().length)
         {
-            EnumCartTypes type = EnumCartTypes.values()[itemStack.getItemDamage()];
-            cart.setCartType(type);
-            if (itemStack.getTagCompound() != null && itemStack.getTagCompound().hasKey("rgb"))
+            switch (EnumCartTypes.values()[itemStack.getItemDamage()])
             {
-                cart.setBlockRenderColor(itemStack.getTagCompound().getInteger("rgb"));
+                case CHEST:
+                    EntityChestCart cart = new EntityChestCart(world);
+                    if (itemStack.getTagCompound() != null && itemStack.getTagCompound().hasKey("rgb"))
+                    {
+                        cart.setBlockRenderColor(itemStack.getTagCompound().getInteger("rgb"));
+                    }
+                    return cart;
+                case TNT:
+                    return new EntityTNTCart(world);
+                case FURNACE:
+                    return new EntityPoweredCart(world);
+                case HOPPER:
+                    return new EntityHopperCart(world);
+                case WORKTABLE:
+                    return new EntityWorkbenchCart(world);
             }
         }
-        return cart;
+        return new EntityEmptyCart(world);
     }
 }

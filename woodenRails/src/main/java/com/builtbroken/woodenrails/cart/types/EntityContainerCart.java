@@ -14,7 +14,7 @@ import net.minecraft.world.World;
 /**
  * Created by Dark on 8/11/2015.
  */
-public class EntityContainerCart extends EntityWoodenCart implements IInventory
+public abstract class EntityContainerCart extends EntityWoodenCart implements IInventory
 {
     private ItemStack[] minecartContainerItems = new ItemStack[36];
     private boolean dropContentsWhenDead = true;

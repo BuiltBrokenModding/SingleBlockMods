@@ -1,5 +1,6 @@
 package com.builtbroken.woodenrails.cart.types;
 
+import com.builtbroken.woodenrails.cart.EnumCartTypes;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
@@ -17,6 +18,12 @@ public class EntityChestCart extends EntityContainerCart
     public EntityChestCart(World world, double xx, double yy, double zz)
     {
         super(world, xx, yy, zz);
+    }
+
+    @Override
+    public EnumCartTypes getCartType()
+    {
+        return EnumCartTypes.CHEST;
     }
 
     @Override

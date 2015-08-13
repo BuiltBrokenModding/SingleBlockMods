@@ -1,9 +1,9 @@
 package com.builtbroken.woodenrails;
 
-import com.builtbroken.woodenrails.cart.ColoredChestCartRecipe;
-import com.builtbroken.woodenrails.cart.EntityWoodenCart;
 import com.builtbroken.woodenrails.cart.EnumCartTypes;
 import com.builtbroken.woodenrails.cart.ItemWoodenCart;
+import com.builtbroken.woodenrails.cart.recipe.ColoredChestCartRecipe;
+import com.builtbroken.woodenrails.cart.types.EntityEmptyCart;
 import com.builtbroken.woodenrails.rail.BlockWoodrails;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
@@ -59,8 +59,8 @@ public class WoodenRails
             itemWoodCart = new ItemWoodenCart();
             GameRegistry.registerItem(itemWoodCart, "wrWoodenCart", DOMAIN);
 
-            EntityRegistry.registerGlobalEntityID(EntityWoodenCart.class, "wrEmptyCart", EntityRegistry.findGlobalUniqueEntityId());
-            EntityRegistry.registerModEntity(EntityWoodenCart.class, "wrEmptyCart", config.getInt("EmptyCart", "EntityIDs", ENTITY_ID_PREFIX, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
+            //EntityRegistry.registerGlobalEntityID(EntityWoodenCart.class, "wrEmptyCart", EntityRegistry.findGlobalUniqueEntityId());
+            EntityRegistry.registerModEntity(EntityEmptyCart.class, "wrEmptyCart", config.getInt("EmptyCart", "EntityIDs", ENTITY_ID_PREFIX, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
         }
         if (config.getBoolean("EnableRail", Configuration.CATEGORY_GENERAL, true, "Allows disabling the wooden rail item and block"))
         {

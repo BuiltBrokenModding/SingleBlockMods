@@ -143,7 +143,7 @@ public class RenderWoodenCart extends Render
         GL11.glScalef(f6, f6, f6);
 
         GL11.glTranslatef(0.0F, (float) entityMinecart.getDisplayTileOffset() / 16.0F, 0.0F);
-        if (entityMinecart.getCartType() == EnumCartTypes.COLORED_CHEST)
+        if (entityMinecart.getCartType() == EnumCartTypes.CHEST && entityMinecart.getBlockRenderColor() != -1)
             renderColoredChest(entityMinecart.getBlockRenderColor());
         else
             this.renderBlocks.renderBlockAsItem(block, entityMinecart.getDisplayTileData(), f1);

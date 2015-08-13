@@ -1,6 +1,7 @@
 package com.builtbroken.woodenrails.cart.types;
 
 import com.builtbroken.woodenrails.cart.EntityWoodenCart;
+import com.builtbroken.woodenrails.cart.EnumCartTypes;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
@@ -28,6 +29,12 @@ public class EntityPoweredCart extends EntityWoodenCart
     public EntityPoweredCart(World world, double xx, double yy, double zz)
     {
         super(world, xx, yy, zz);
+    }
+
+    @Override
+    public EnumCartTypes getCartType()
+    {
+        return EnumCartTypes.FURNACE;
     }
 
     @Override

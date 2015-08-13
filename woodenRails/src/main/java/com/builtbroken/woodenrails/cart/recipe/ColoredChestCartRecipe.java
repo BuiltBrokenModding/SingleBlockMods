@@ -1,6 +1,7 @@
-package com.builtbroken.woodenrails.cart;
+package com.builtbroken.woodenrails.cart.recipe;
 
 import com.builtbroken.woodenrails.WoodenRails;
+import com.builtbroken.woodenrails.cart.EnumCartTypes;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemBlock;
@@ -17,7 +18,7 @@ public class ColoredChestCartRecipe extends ShapedOreRecipe
 
     public ColoredChestCartRecipe(Block coloredChest)
     {
-        super(new ItemStack(WoodenRails.itemWoodCart, 1, EnumCartTypes.COLORED_CHEST.ordinal()), "c", "r", 'c', coloredChest, 'r', new ItemStack(WoodenRails.itemWoodCart));
+        super(new ItemStack(WoodenRails.itemWoodCart, 1, EnumCartTypes.CHEST.ordinal()), "c", "r", 'c', coloredChest, 'r', new ItemStack(WoodenRails.itemWoodCart));
         this.coloredChest = coloredChest;
     }
 
