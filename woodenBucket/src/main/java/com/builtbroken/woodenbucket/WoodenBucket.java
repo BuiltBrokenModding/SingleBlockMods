@@ -81,6 +81,7 @@ public class WoodenBucket
             GameRegistry.registerBlock(blockMilk, "wbBlockMilk");
         }
 
+
         //TODO add crafting recipes for milk bucket
         // TODO add proper ore shaped recipes so modded sticks and other items can be used in the recipes
         GameRegistry.addShapedRecipe(new ItemStack(itemBucket, 1, ItemWoodenBucket.BucketTypes.OAK.ordinal()), " s ", "wcw", " w ", 'w', new ItemStack(Blocks.planks, 1, 0), 's', Items.stick, 'c', new ItemStack(Items.dye, 1, 2));

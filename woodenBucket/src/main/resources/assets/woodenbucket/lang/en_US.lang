@@ -9,5 +9,6 @@ item.woodenbucket:WoodenBucket.charred.name=Charred Bucket
 item.woodenbucket:WoodenBucket.fluid.name=Fluid
 item.woodenbucket:WoodenBucket.fluid.amount.name=Amount
 item.woodenbucket:WoodenBucket.error.fluid.milk.notRegistered=The cow seem to dislike the bucket
+item.woodenbucket:WoodenBucket.volume.notEnoughForFullBlock=Need a 1000mb to place a full block of fluid
 fluid.milk=Milk
 tile.woodenBucket:milk.name=Milk

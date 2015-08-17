@@ -1,6 +1,7 @@
 package com.builtbroken.woodenbucket.bucket;
 
 import com.builtbroken.woodenbucket.WoodenBucket;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
@@ -17,11 +18,15 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.ForgeDirection;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.fluids.*;
 
 import java.util.HashMap;
@@ -70,6 +75,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         this.setUnlocalizedName(WoodenBucket.PREFIX + "WoodenBucket");
         this.setCreativeTab(CreativeTabs.tabMisc);
         this.setHasSubtypes(true);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SideOnly(Side.CLIENT)
@@ -79,6 +85,65 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         {
             list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.name") + ": " + getFluid(stack).getLocalizedName());
             list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.amount.name") + ": " + getFluid(stack).amount + "mb");
+        }
+    }
+
+    @SubscribeEvent
+    public void onRightClickEvent(PlayerInteractEvent event)
+    {
+        if (!event.world.isRemote && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK && event.entityPlayer.getCurrentEquippedItem() != null && event.entityPlayer.getCurrentEquippedItem().getItem() == this)
+        {
+            TileEntity tile = event.world.getTileEntity(event.x, event.y, event.z);
+
+            if (tile instanceof IFluidHandler)
+            {
+                boolean isBucketEmpty = this.isEmpty(event.entityPlayer.getCurrentEquippedItem());
+                ForgeDirection side = ForgeDirection.getOrientation(event.face);
+                if (isBucketEmpty)
+                {
+                    FluidStack drainedFromTank = ((IFluidHandler) tile).drain(side, getCapacity(event.entityPlayer.getCurrentEquippedItem()), false);
+                    if (drainedFromTank != null && drainedFromTank.getFluid() != null && ((IFluidHandler) tile).canDrain(side, drainedFromTank.getFluid()))
+                    {
+                        if (event.entityPlayer.capabilities.isCreativeMode)
+                        {
+                            ((IFluidHandler) tile).drain(side, FluidContainerRegistry.BUCKET_VOLUME, true);
+                        }
+                        else
+                        {
+                            ItemStack bucket = new ItemStack(this, 1, event.entityPlayer.getCurrentEquippedItem().getItemDamage());
+                            int filledIntoBucket = fill(bucket, drainedFromTank, true);
+                            if (filledIntoBucket > 0)
+                            {
+                                ((IFluidHandler) tile).drain(side, filledIntoBucket, true);
+                                event.entityPlayer.inventory.setInventorySlotContents(event.entityPlayer.inventory.currentItem, consumeBucket(event.entityPlayer.getCurrentEquippedItem(), event.entityPlayer, bucket));
+                                event.entityPlayer.inventoryContainer.detectAndSendChanges();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    FluidStack containedFluid = getFluid(event.entityPlayer.getCurrentEquippedItem());
+                    if (((IFluidHandler) tile).canFill(side, containedFluid.getFluid()))
+                    {
+                        int filled = ((IFluidHandler) tile).fill(side, containedFluid, true);
+                        if (!event.entityPlayer.capabilities.isCreativeMode)
+                        {
+                            drain(event.entityPlayer.getCurrentEquippedItem(), filled, true);
+                            containedFluid = getFluid(event.entityPlayer.getCurrentEquippedItem());
+                            if (containedFluid == null || containedFluid.amount == 0)
+                            {
+                                event.entityPlayer.inventory.setInventorySlotContents(event.entityPlayer.inventory.currentItem, consumeBucket(event.entityPlayer.getCurrentEquippedItem(), event.entityPlayer, new ItemStack(this, 1, event.entityPlayer.getCurrentEquippedItem().getItemDamage())));
+                                event.entityPlayer.inventoryContainer.detectAndSendChanges();
+                            }
+                        }
+                    }
+                }
+                if (event.isCancelable())
+                {
+                    event.setCanceled(true);
+                }
+            }
         }
     }
 
@@ -285,6 +350,10 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                     }
                 }
             }
+        }
+        else if (!world.isRemote)
+        {
+            player.addChatComponentMessage(new ChatComponentText(getUnlocalizedName() + ".volume.notEnoughForFullBlock"));
         }
         return itemstack;
     }
