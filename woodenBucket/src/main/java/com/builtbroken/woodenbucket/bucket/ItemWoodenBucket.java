@@ -161,6 +161,14 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
                 int j = movingobjectposition.blockY;
                 int k = movingobjectposition.blockZ;
 
+                TileEntity tile = world.getTileEntity(i, j, k);
+
+                if (tile instanceof IFluidHandler)
+                {
+                    return itemstack;
+                }
+
+
                 if (!world.canMineBlock(player, i, j, k))
                 {
                     return itemstack;
