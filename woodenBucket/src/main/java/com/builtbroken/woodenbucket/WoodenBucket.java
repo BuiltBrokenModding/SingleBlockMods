@@ -115,7 +115,7 @@ public class WoodenBucket
                     {
                         ItemStack milkBucket = new ItemStack(itemBucket, 1, type.ordinal());
                         ((ItemWoodenBucket) itemBucket).fill(milkBucket, milkFluidStack, true);
-                        OreDictionary.registerOre("listAllmilk", milkBucket);
+                        /** OreDictionary.registerOre("listAllmilk", milkBucket); */
 
                         try
                         {
@@ -129,16 +129,18 @@ public class WoodenBucket
                 }
         }
 
-        if(config.getBoolean("listAllWater", "OreDictionary", true, "Lists all water buckets under the ore dictionary name listAllWater"))
-        {
-            FluidStack waterFluidStack = new FluidStack(FluidRegistry.WATER, FluidContainerRegistry.BUCKET_VOLUME);
-            for (ItemWoodenBucket.BucketTypes type : ItemWoodenBucket.BucketTypes.values())
-            {
-                ItemStack waterBucket = new ItemStack(itemBucket, 1, type.ordinal());
-                ((ItemWoodenBucket) itemBucket).fill(waterBucket, waterFluidStack, true);
-                OreDictionary.registerOre("listAllWater", waterBucket);
-            }
-        }
+        /**
+         if(config.getBoolean("listAllWater", "OreDictionary", true, "Lists all water buckets under the ore dictionary name listAllWater"))
+         {
+         FluidStack waterFluidStack = new FluidStack(FluidRegistry.WATER, FluidContainerRegistry.BUCKET_VOLUME);
+         for (ItemWoodenBucket.BucketTypes type : ItemWoodenBucket.BucketTypes.values())
+         {
+         ItemStack waterBucket = new ItemStack(itemBucket, 1, type.ordinal());
+         ((ItemWoodenBucket) itemBucket).fill(waterBucket, waterFluidStack, true);
+         OreDictionary.registerOre("listAllWater", waterBucket);
+         }
+         }
+         */
         config.save();
     }
 }
