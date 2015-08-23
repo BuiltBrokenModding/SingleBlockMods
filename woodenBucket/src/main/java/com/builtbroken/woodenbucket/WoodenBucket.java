@@ -30,7 +30,6 @@ import java.io.File;
 @Mod(modid = WoodenBucket.DOMAIN, name = "Wooden Bucket", version = "@MAJOR@.@MINOR@.@REVIS@.@BUILD@")
 public class WoodenBucket
 {
-    public int ENTITY_ID_PREFIX = 56;
     public static final String DOMAIN = "woodenbucket";
     public static final String PREFIX = DOMAIN + ":";
 
