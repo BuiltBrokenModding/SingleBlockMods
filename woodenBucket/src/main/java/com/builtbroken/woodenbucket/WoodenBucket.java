@@ -1,6 +1,7 @@
 package com.builtbroken.woodenbucket;
 
 import com.builtbroken.woodenbucket.bucket.ItemWoodenBucket;
+import com.builtbroken.woodenbucket.bucket.PamBucketRecipe;
 import com.builtbroken.woodenbucket.fluid.BlockMilk;
 import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
@@ -116,14 +117,7 @@ public class WoodenBucket
                         ((ItemWoodenBucket) itemBucket).fill(milkBucket, milkFluidStack, true);
                         /** OreDictionary.registerOre("listAllmilk", milkBucket); */
 
-                        try
-                        {
-                            GameRegistry.addShapedRecipe(new ItemStack(itemFreshMilk, 4, 0), "   ", " b ", "   ", 'b', milkBucket);
-                        } catch (Exception e)
-                        {
-                            LOGGER.error("Failed to generate recipe for pam's fresh milk item for " + milkBucket);
-                            e.printStackTrace();
-                        }
+                        GameRegistry.addRecipe(new PamBucketRecipe(milkBucket, new ItemStack(itemFreshMilk, 4, 0)));
                     }
                 }
         }
