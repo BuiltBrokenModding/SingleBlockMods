@@ -738,6 +738,18 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         return new ItemStack(this, itemstack.getItemDamage());
     }
 
+    @Override
+    public boolean doesContainerItemLeaveCraftingGrid(ItemStack stack)
+    {
+        return isEmpty(stack);
+    }
+
+    @Override
+    public boolean hasContainerItem(ItemStack stack)
+    {
+        return getFluid(stack) != null;
+    }
+
     public enum BucketTypes
     {
         OAK,
