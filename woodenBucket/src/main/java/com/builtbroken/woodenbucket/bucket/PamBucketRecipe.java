@@ -8,6 +8,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidStack;
 
 /**
+ * Simple recipe to handle integration with Pam's Harvestcraft fresh milk buckets
  * Created by Dark on 8/24/2015.
  */
 public class PamBucketRecipe extends ShapedRecipes
