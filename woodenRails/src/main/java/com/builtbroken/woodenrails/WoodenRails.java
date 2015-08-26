@@ -20,11 +20,14 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.common.config.Configuration;
+import net.minecraftforge.oredict.RecipeSorter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.io.File;
+
+import static net.minecraftforge.oredict.RecipeSorter.Category.SHAPED;
 
 /**
  * Created by Dark on 7/25/2015.
@@ -95,7 +98,10 @@ public class WoodenRails
                 {
                     Block blockChest = (Block) Block.blockRegistry.getObject("coloredchests:coloredChest");
                     if (blockChest != null)
+                    {
+                        RecipeSorter.register(PREFIX + "coloredCartRecipe", ColoredChestCartRecipe.class, SHAPED, "after:minecraft:shaped");
                         GameRegistry.addRecipe(new ColoredChestCartRecipe(blockChest));
+                    }
                 } catch (Exception e)
                 {
                     LOGGER.error("Failed to load Colored Chest support");

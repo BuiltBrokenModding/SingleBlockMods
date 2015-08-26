@@ -20,10 +20,13 @@ import net.minecraftforge.fluids.FluidContainerRegistry;
 import net.minecraftforge.fluids.FluidRegistry;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.oredict.RecipeSorter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+
+import static net.minecraftforge.oredict.RecipeSorter.Category.SHAPED;
 
 /**
  * Created by Dark on 7/25/2015.
@@ -101,9 +104,9 @@ public class WoodenBucket
         //TODO add pam's harvest craft support
         if (Loader.isModLoaded("harvestcraft"))
         {
-            //
             if (config.getBoolean("EnableRegisteringMilkBucket", "PamHarvestCraftSupport", true, "Registers the milk bucket to the ore dictionary to be used in Pam's Harvest Craft recipes"))
-
+            {
+                RecipeSorter.register(PREFIX + "woodenBucketFreshMilk", PamBucketRecipe.class, SHAPED, "after:minecraft:shaped");
                 if (FluidRegistry.getFluid("milk") != null)
                 {
                     Item itemFreshMilk = (Item) Item.itemRegistry.getObject("harvestcraft:freshmilkItem");
@@ -120,6 +123,7 @@ public class WoodenBucket
                         GameRegistry.addRecipe(new PamBucketRecipe(milkBucket, new ItemStack(itemFreshMilk, 4, 0)));
                     }
                 }
+            }
         }
 
         /**
