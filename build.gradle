@@ -33,7 +33,35 @@ apply from: 'https://raw.githubusercontent.com/BuiltBrokenModding/BuiltBrokenScr
 import org.gradle.api.artifacts.*
 subprojects.each { subproject -> evaluationDependsOn( subproject.path ) }
 
-task setupDecompWorkspaceAll(dependsOn:
-	  :cardboardBoxes.collect { ':' + it + ":setupDecompWorkspace" }
-	+ :coloredChests.collect { ':' + it + ":setupDecompWorkspace" }
-	+ :coloredPots.collect { ':' + it + ":setupDecompWorkspace" }) {}
+//task setupDecompWorkspaceAll(dependsOn:
+//	  :cardboardBoxes.collect { ':' + it + ":setupDecompWorkspace" }
+//	+ :coloredChests.collect { ':' + it + ":setupDecompWorkspace" }
+//	+ :coloredPots.collect { ':' + it + ":setupDecompWorkspace" })
+
+//task assembleCB{(type: Jar, dependsOn: [\
+//		':cardboardBoxes:build'])
+//}
+
+task assembleAll(type: Jar, dependsOn: [\
+		':cardboardBoxes:build'])
+	
+	{
+	archiveName="ColoredChests-1.7.10-${ColoredChests}.jar"
+	
+	from zipTree(project(":cardboardBoxes").jar.archivePath)
+	
+	for (p in projects1710) {
+		from zipTree(project(p).jar.archivePath)
+	}
+}
+	
+
+
+jar {
+    manifest.mainAttributes(
+            "Built-By": System.getProperty('user.name'),
+            "Created-By": currentJvm,
+            "Implementation-Title": archivesBaseName,
+            "Implementation-Version": project.version,
+    )
+}
