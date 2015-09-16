@@ -30,6 +30,9 @@ apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'jacoco'
 apply from: 'https://raw.githubusercontent.com/BuiltBrokenModding/BuiltBrokenScripts/buildScripts/scripts/forge/deps.gradle'
 
+def currentJvm = org.gradle.internal.jvm.Jvm.current()
+println "Current Java version = " + currentJvm
+
 import org.gradle.api.artifacts.*
 subprojects.each { subproject -> evaluationDependsOn( subproject.path ) }
 
@@ -38,25 +41,24 @@ subprojects.each { subproject -> evaluationDependsOn( subproject.path ) }
 //	+ :coloredChests.collect { ':' + it + ":setupDecompWorkspace" }
 //	+ :coloredPots.collect { ':' + it + ":setupDecompWorkspace" })
 
-//task assembleCB{(type: Jar, dependsOn: [\
-//		':cardboardBoxes:build'])
-//}
-
-task assembleAll(type: Jar, dependsOn: [\
-		':cardboardBoxes:build'])
-	
-	{
-	archiveName="ColoredChests-1.7.10-${ColoredChests}.jar"
+task assembleCB(type: Jar, dependsOn: [\
+		':cardboardBoxes:build']) {
+	//archiveName="cardboardBoxes-1.7.10-${cardboardBoxesVersion}.jar"
 	
 	from zipTree(project(":cardboardBoxes").jar.archivePath)
-	
-	for (p in projects1710) {
-		from zipTree(project(p).jar.archivePath)
-	}
 }
+
+//task assembleAll(type: Jar, dependsOn: [\
+//		':cardboardBoxes:build']) {
+//	archiveName="cardboardBoxes-1.7.10-${ColoredChests}.jar"
+//	
+//	from zipTree(project(":cardboardBoxes").jar.archivePath)
+//	
+//	for (p in projects1710) {
+//		from zipTree(project(p).jar.archivePath)
+//	}
+//}
 	
-
-
 jar {
     manifest.mainAttributes(
             "Built-By": System.getProperty('user.name'),
