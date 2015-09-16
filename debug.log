@@ -1,0 +1,26 @@
+Starting process 'command 'C:\java\jdk1.7.0_79\bin\java.exe''. Working directory: C:\Users\Admin\Desktop\Mikes_Stuff\Minecraft\Github\BBM\SingleBlockMods Command: C:\java\jdk1.7.0_79\bin\java.exe -version
+Successfully started process 'command 'C:\java\jdk1.7.0_79\bin\java.exe''
+To honour the JVM settings for this build a new JVM will be forked. Please consider using the daemon: https://docs.gradle.org/2.7/userguide/gradle_daemon.html.
+Starting process 'command 'C:\java\jdk1.7.0_79\bin\java.exe''. Working directory: C:\Users\Admin\Desktop\Mikes_Stuff\Minecraft\Github\BBM\SingleBlockMods Command: C:\java\jdk1.7.0_79\bin\java.exe -version
+Successfully started process 'command 'C:\java\jdk1.7.0_79\bin\java.exe''
+Starting daemon process: workingDir = C:\Users\Admin\.gradle\daemon\2.7, daemonArgs: [C:\java\jdk1.7.0_79\bin\java.exe, -XX:MaxPermSize=256m, -XX:+HeapDumpOnOutOfMemoryError, -Xmx1024m, -Dfile.encoding=windows-1252, -Duser.country=US, -Duser.language=en, -Duser.variant, -cp, C:\Gradle\lib\gradle-launcher-2.7.jar, org.gradle.launcher.daemon.bootstrap.GradleDaemon, 2.7]
+Starting process 'Gradle build daemon'. Working directory: C:\Users\Admin\.gradle\daemon\2.7 Command: C:\java\jdk1.7.0_79\bin\java.exe -XX:MaxPermSize=256m -XX:+HeapDumpOnOutOfMemoryError -Xmx1024m -Dfile.encoding=windows-1252 -Duser.country=US -Duser.language=en -Duser.variant -cp C:\Gradle\lib\gradle-launcher-2.7.jar org.gradle.launcher.daemon.bootstrap.GradleDaemon 2.7
+Successfully started process 'Gradle build daemon'
+An attempt to start the daemon took 1.628 secs.
+Connected to daemon DaemonInfo{pid=12880, address=[c6c57da0-6de1-442d-a5e1-762775eeaed1 port:51998, addresses:[/127.0.0.1, /0:0:0:0:0:0:0:1]], idle=false, context=DefaultDaemonContext[uid=a4a87f60-a489-4f4b-9623-cce5276a9d39,javaHome=C:\java\jdk1.7.0_79,daemonRegistryDir=C:\Users\Admin\.gradle\daemon,pid=12880,idleTimeout=120000,daemonOpts=-XX:MaxPermSize=256m,-XX:+HeapDumpOnOutOfMemoryError,-Xmx1024m,-Dfile.encoding=windows-1252,-Duser.country=US,-Duser.language=en,-Duser.variant]}. Dispatching request BuildAndStop{id=2e4e9642-8116-48e4-b00f-bcaa9d9e9bbc.1, currentDir=C:\Users\Admin\Desktop\Mikes_Stuff\Minecraft\Github\BBM\SingleBlockMods}.
+Received result org.gradle.launcher.daemon.protocol.BuildStarted@7d94beb9 from daemon DaemonInfo{pid=12880, address=[c6c57da0-6de1-442d-a5e1-762775eeaed1 port:51998, addresses:[/127.0.0.1, /0:0:0:0:0:0:0:1]], idle=false, context=DefaultDaemonContext[uid=a4a87f60-a489-4f4b-9623-cce5276a9d39,javaHome=C:\java\jdk1.7.0_79,daemonRegistryDir=C:\Users\Admin\.gradle\daemon,pid=12880,idleTimeout=120000,daemonOpts=-XX:MaxPermSize=256m,-XX:+HeapDumpOnOutOfMemoryError,-Xmx1024m,-Dfile.encoding=windows-1252,-Duser.country=US,-Duser.language=en,-Duser.variant]} (build should be starting).
+The client will now receive all logging from the daemon (pid: 12880). The daemon log file: C:\Users\Admin\.gradle\daemon\2.7\daemon-12880.out.log
+Executing build with daemon context: DefaultDaemonContext[uid=a4a87f60-a489-4f4b-9623-cce5276a9d39,javaHome=C:\java\jdk1.7.0_79,daemonRegistryDir=C:\Users\Admin\.gradle\daemon,pid=12880,idleTimeout=120000,daemonOpts=-XX:MaxPermSize=256m,-XX:+HeapDumpOnOutOfMemoryError,-Xmx1024m,-Dfile.encoding=windows-1252,-Duser.country=US,-Duser.language=en,-Duser.variant]
+Starting Build
+Settings evaluated using settings file 'C:\Users\Admin\Desktop\Mikes_Stuff\Minecraft\Github\BBM\SingleBlockMods\settings.gradle'.
+Projects loaded. Root project using build file 'C:\Users\Admin\Desktop\Mikes_Stuff\Minecraft\Github\BBM\SingleBlockMods\build.gradle'.
+Included projects: [root project 'SingleBlockMods', project ':cardboardBoxes', project ':coloredChests', project ':coloredPots', project ':redbull', project ':teleportDoor', project ':template', project ':threadedGrass', project ':woodenBucket', project ':woodenRails', project ':woodenShears']
+Configuration on demand is an incubating feature.
+Evaluating root project 'SingleBlockMods' using build file 'C:\Users\Admin\Desktop\Mikes_Stuff\Minecraft\Github\BBM\SingleBlockMods\build.gradle'.
+Compiling build file 'C:\Users\Admin\Desktop\Mikes_Stuff\Minecraft\Github\BBM\SingleBlockMods\build.gradle' using SubsetScriptTransformer.
+
+BUILD FAILED
+
+Total time: 7.017 secs
+Received result Failure[value=org.gradle.initialization.ReportedException: org.gradle.internal.exceptions.LocationAwareException: Build file 'C:\Users\Admin\Desktop\Mikes_Stuff\Minecraft\Github\BBM\SingleBlockMods\build.gradle' line: 37
+Could not compile build file 'C:\Users\Admin\Desktop\Mikes_Stuff\Minecraft\Github\BBM\SingleBlockMods\build.gradle'.] from daemon DaemonInfo{pid=12880, address=[c6c57da0-6de1-442d-a5e1-762775eeaed1 port:51998, addresses:[/127.0.0.1, /0:0:0:0:0:0:0:1]], idle=false, context=DefaultDaemonContext[uid=a4a87f60-a489-4f4b-9623-cce5276a9d39,javaHome=C:\java\jdk1.7.0_79,daemonRegistryDir=C:\Users\Admin\.gradle\daemon,pid=12880,idleTimeout=120000,daemonOpts=-XX:MaxPermSize=256m,-XX:+HeapDumpOnOutOfMemoryError,-Xmx1024m,-Dfile.encoding=windows-1252,-Duser.country=US,-Duser.language=en,-Duser.variant]} (build should be done).
