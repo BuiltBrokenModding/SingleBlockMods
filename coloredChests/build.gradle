@@ -1,5 +1,8 @@
 apply plugin: 'java'
 
+apply from: 'https://raw.githubusercontent.com/BuiltBrokenModding/BuiltBrokenScripts/buildScripts/index-sbm.gradle'
+
+
 println "Current Minecraft version = " + minecraft.apiVersion
 
 def currentJvm = org.gradle.internal.jvm.Jvm.current()
@@ -20,11 +23,6 @@ processResources {
 		exclude '**/*.info'
 		exclude '**/*.properties'
 	}
-}
-
-dependencies 
-{
-    compile "dev.builtbroken.voltzengine:VoltzEngine:1.7.10-0.+:deobf-dev"
 }
 
 def getDate() {
