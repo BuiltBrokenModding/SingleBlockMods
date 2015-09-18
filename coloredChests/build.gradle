@@ -2,12 +2,6 @@ apply plugin: 'java'
 
 apply from: 'https://raw.githubusercontent.com/BuiltBrokenModding/BuiltBrokenScripts/buildScripts/index-sbm.gradle'
 
-
-println "Current Minecraft version = " + minecraft.apiVersion
-
-def currentJvm = org.gradle.internal.jvm.Jvm.current()
-println "Current Java version = " + currentJvm
-
 processResources {
 	from(sourceSets.main.resources.srcDirs) {
 		//include '**/*.lang'

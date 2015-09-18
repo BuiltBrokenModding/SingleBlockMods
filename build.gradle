@@ -57,9 +57,17 @@ task assembleCC(type: Jar, dependsOn: [\
 	from zipTree(project(":coloredChests").jar.archivePath)
 }
 
+task assembleCP(type: Jar, dependsOn: [\
+    ':coloredPots:build']){
+	//archiveName="cardboardBoxes-1.7.10-${cardboardBoxesVersion}.jar"
+	
+	from zipTree(project(":coloredPots").jar.archivePath)
+}
+
 task assembleAll(dependsOn: [
 	assembleCB,
-	assembleCC]
+	assembleCC,
+    assembleCP]
 ) {
 }
 	
