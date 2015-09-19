@@ -1,13 +1,21 @@
 apply plugin: 'java'
+apply from: 'https://raw.githubusercontent.com/BuiltBrokenModding/BuiltBrokenScripts/buildScripts/index-sbm.gradle'
 
-println "Current Minecraft version = " + minecraft.apiVersion
+processResources {
+	from(sourceSets.main.resources.srcDirs) {
+		//include '**/*.lang'
+		include '**/*.info'
+		include '**/*.properties'
 
-def currentJvm = org.gradle.internal.jvm.Jvm.current()
-println "Current Java version = " + currentJvm
+		expand 'version': project.version, 'mcversion': project.minecraft.version
+		// replace version and MCVersion
+	}
 
-dependencies 
-{
-    compile "dev.builtbroken.voltzengine:VoltzEngine:1.7.10-0.+:deobf-dev"
+	// copy everything else, thats not text
+	from(sourceSets.main.resources.srcDirs) {
+		exclude '**/*.info'
+		exclude '**/*.properties'
+	}
 }
 
 def getDate() {
@@ -16,4 +24,4 @@ def getDate() {
     return formattedDate
 }
 
-file("Colored-Pots.txt").text = version;
+file("threadedGrass.txt").text = version;

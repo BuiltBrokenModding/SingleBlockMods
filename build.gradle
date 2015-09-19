@@ -28,7 +28,6 @@ apply plugin: 'forge'
 apply plugin: 'curseforge'
 apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'jacoco'
-apply from: 'https://raw.githubusercontent.com/BuiltBrokenModding/BuiltBrokenScripts/buildScripts/scripts/forge/deps.gradle'
 
 println "Current Minecraft version = " + minecraft.apiVersion
 println archivesBaseName
@@ -39,6 +38,10 @@ println "Current Java version = " + currentJvm
 import org.gradle.api.artifacts.*
 subprojects.each { subproject -> evaluationDependsOn( subproject.path ) }
 
+//task cleanUp{
+//   delete '*/output'
+//}
+
 //task setupDecompWorkspaceAll(dependsOn:
 //	  :cardboardBoxes.collect { ':' + it + ":setupDecompWorkspace" }
 //	+ :coloredChests.collect { ':' + it + ":setupDecompWorkspace" }
@@ -48,26 +51,54 @@ task assembleCB(type: Jar, dependsOn: [\
     ':cardboardBoxes:build']) {
 	//archiveName="cardboardBoxes-1.7.10-${cardboardBoxesVersion}.jar"
 	
-	from zipTree(project(":cardboardBoxes").jar.archivePath)
+	//from zipTree(project(":cardboardBoxes").jar.archivePath)
 }
 task assembleCC(type: Jar, dependsOn: [\
     ':coloredChests:build']) {
 	//archiveName="coloredChests1.7.10-${cardboardBoxesVersion}.jar"
 	
-	from zipTree(project(":coloredChests").jar.archivePath)
+	//from zipTree(project(":coloredChests").jar.archivePath)
 }
 
 task assembleCP(type: Jar, dependsOn: [\
     ':coloredPots:build']){
 	//archiveName="cardboardBoxes-1.7.10-${cardboardBoxesVersion}.jar"
 	
-	from zipTree(project(":coloredPots").jar.archivePath)
+	//from zipTree(project(":coloredPots").jar.archivePath)
 }
+
+task assembleRB(type: Jar, dependsOn: [\
+    ':redbull:build']){
+	//archiveName="cardboardBoxes-1.7.10-${cardboardBoxesVersion}.jar"
+	
+	//from zipTree(project(":redbull").jar.archivePath)
+}
+
+task assembleTD(type: Jar, dependsOn: [\
+    ':teleportDoor:build']){}
+    
+task assembleTG(type: Jar, dependsOn: [\
+    ':threadedGrass:build']){}
+
+task assembleWB(type: Jar, dependsOn: [\
+    ':woodenBucket:build']){}
+
+task assembleWR(type: Jar, dependsOn: [\
+    ':woodenRails:build']) {}
+
+task assembleWS(type: Jar, dependsOn: [\
+    ':woodenShears:build']){}
 
 task assembleAll(dependsOn: [
 	assembleCB,
 	assembleCC,
-    assembleCP]
+	assembleCP,
+    assembleRB,
+    assembleTD,
+    assembleTG,
+    assembleWB,
+    assembleWR,
+    assembleWS]
 ) {
 }
 	

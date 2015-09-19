@@ -24,5 +24,4 @@ def getDate() {
     return formattedDate
 }
 
-
 file("Colored-Pots.txt").text = version;
