@@ -5,7 +5,6 @@ import cpw.mods.fml.client.FMLClientHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.model.ModelBase;
 import net.minecraft.client.model.ModelChest;
-import net.minecraft.client.model.ModelLargeChest;
 import net.minecraft.client.model.ModelMinecart;
 import net.minecraft.client.renderer.RenderBlocks;
 import net.minecraft.client.renderer.entity.Render;
@@ -26,11 +25,9 @@ import java.awt.*;
 public class RenderWoodenCart extends Render
 {
     private static final ResourceLocation minecartTextures = new ResourceLocation(WoodenRails.DOMAIN, "textures/entity/minecart.png");
-    public static final ResourceLocation textureDoubleChest = new ResourceLocation("coloredchests", "textures/entity/chest/grey_scale_double.png");
     public static final ResourceLocation textureChest = new ResourceLocation("coloredchests", "textures/entity/chest/grey_scale.png");
 
     public static ModelChest modelChest = new ModelChest();
-    public static ModelChest modelLargeChest = new ModelLargeChest();
 
     /** instance of ModelMinecart for rendering */
     protected ModelBase modelMinecart = new ModelMinecart();
