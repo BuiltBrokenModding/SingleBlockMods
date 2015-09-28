@@ -66,10 +66,10 @@ public class WoodenRails
             EntityRegistry.registerModEntity(EntityEmptyCart.class, "wrEmptyCart", config.getInt("EmptyCart", "EntityIDs", ENTITY_ID_PREFIX, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
             EntityRegistry.registerModEntity(EntityChestCart.class, "wrChestCart", config.getInt("ChestCart", "EntityIDs", ENTITY_ID_PREFIX + 1, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
             EntityRegistry.registerModEntity(EntityHopperCart.class, "wrHopperCart", config.getInt("HopperCart", "EntityIDs", ENTITY_ID_PREFIX + 2, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
-            EntityRegistry.registerModEntity(EntityEmptyCart.class, "wrPoweredCart", config.getInt("PoweredCart", "EntityIDs", ENTITY_ID_PREFIX + 3, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
+            EntityRegistry.registerModEntity(EntityPoweredCart.class, "wrPoweredCart", config.getInt("PoweredCart", "EntityIDs", ENTITY_ID_PREFIX + 3, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
             EntityRegistry.registerModEntity(EntityTNTCart.class, "wrTNTCart", config.getInt("TNTCart", "EntityIDs", ENTITY_ID_PREFIX + 4, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
             EntityRegistry.registerModEntity(EntityWorkbenchCart.class, "wrWorkbenchCart", config.getInt("WorkbenchCart", "EntityIDs", ENTITY_ID_PREFIX + 5, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
-            EntityRegistry.registerModEntity(EntityBCTankCart.class, "wrBCTankCart", config.getInt("BCTankCart", "EntityIDs", ENTITY_ID_PREFIX + 6, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
+            EntityRegistry.registerModEntity(EntityTankCart.class, "wrTankCart", config.getInt("BCTankCart", "EntityIDs", ENTITY_ID_PREFIX + 6, 0, 10000, "Entity ID used for the empty wooden cart, max ID is unknown so keep it low"), this, 64, 1, true);
         }
         if (config.getBoolean("EnableRail", Configuration.CATEGORY_GENERAL, true, "Allows disabling the wooden rail item and block"))
         {
