@@ -13,7 +13,7 @@ public enum EnumCartTypes
     FURNACE(EntityPoweredCart.class, "PoweredCart"),
     HOPPER(EntityHopperCart.class, "HopperCart"),
     TNT(EntityTNTCart.class, "TNTCart"),
-    BC_TANK(EntityBCTank.class, "BCTankCart");
+    BC_TANK(EntityBCTankCart.class, "BCTankCart");
 
     public final Class<? extends EntityWoodenCart> clazz;
     public final String entityName;
