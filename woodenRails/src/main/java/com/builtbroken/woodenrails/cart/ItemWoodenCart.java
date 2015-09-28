@@ -71,6 +71,11 @@ public class ItemWoodenCart extends Item
                         cart.setMinecartName(itemStack.getDisplayName());
 
                     world.spawnEntityInWorld(cart);
+
+                    if (itemStack.getTagCompound() != null && itemStack.getTagCompound().hasKey("rgb"))
+                    {
+                        cart.setBlockRenderColor(itemStack.getTagCompound().getInteger("rgb"));
+                    }
                 }
                 if (!player.capabilities.isCreativeMode)
                     --itemStack.stackSize;
@@ -206,12 +211,7 @@ public class ItemWoodenCart extends Item
             switch (EnumCartTypes.values()[itemStack.getItemDamage()])
             {
                 case CHEST:
-                    EntityChestCart cart = new EntityChestCart(world);
-                    if (itemStack.getTagCompound() != null && itemStack.getTagCompound().hasKey("rgb"))
-                    {
-                        cart.setBlockRenderColor(itemStack.getTagCompound().getInteger("rgb"));
-                    }
-                    return cart;
+                    return new EntityChestCart(world);
                 case TNT:
                     return new EntityTNTCart(world);
                 case FURNACE:

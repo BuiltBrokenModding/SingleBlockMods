@@ -7,14 +7,14 @@ import net.minecraft.world.World;
 /**
  * Created by Dark on 8/12/2015.
  */
-public class EntityBCTank extends EntityWoodenCart
+public class EntityBCTankCart extends EntityWoodenCart
 {
-    public EntityBCTank(World world)
+    public EntityBCTankCart(World world)
     {
         super(world);
     }
 
-    public EntityBCTank(World world, double xx, double yy, double zz)
+    public EntityBCTankCart(World world, double xx, double yy, double zz)
     {
         super(world, xx, yy, zz);
     }
