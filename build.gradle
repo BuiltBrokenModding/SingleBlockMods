@@ -48,7 +48,8 @@ subprojects.each { subproject -> evaluationDependsOn( subproject.path ) }
 //	+ :coloredPots.collect { ':' + it + ":setupDecompWorkspace" })
 
 task assembleCB(type: Jar, dependsOn: [\
-    ':cardboardBoxes:build']) {
+    ':cardboardBoxes:build',
+    ]) {
 	//archiveName="cardboardBoxes-1.7.10-${cardboardBoxesVersion}.jar"
 	
 	//from zipTree(project(":cardboardBoxes").jar.archivePath)
@@ -88,6 +89,17 @@ task assembleWR(type: Jar, dependsOn: [\
 
 task assembleWS(type: Jar, dependsOn: [\
     ':woodenShears:build']){}
+    
+task copyMethodCB(type: Copy) {
+    from 'cardboardBoxes/output'
+    into 'output'
+    include '*.jar'
+    exclude { details -> details.file.name.endsWith('.html') &&
+                         details.file.text.contains('staging') }
+    mustRunAfter "assembleCB"
+}
+
+copyMethodCB.dependsOn assembleCB
 
 task assembleAll(dependsOn: [
 	assembleCB,
