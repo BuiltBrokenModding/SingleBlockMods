@@ -101,8 +101,19 @@ task copyMethodCB(type: Copy) {
 
 copyMethodCB.dependsOn assembleCB
 
+task copyMethodCC(type: Copy) {
+    from 'coloredChests/output'
+    into 'output'
+    include '*.jar'
+    exclude { details -> details.file.name.endsWith('.html') &&
+                         details.file.text.contains('staging') }
+    mustRunAfter "assembleCB"
+}
+
+copyMethodCC.dependsOn assembleCC
+
 task assembleAll(dependsOn: [
-	assembleCB,
+	copyMethodCB,
 	assembleCC,
 	assembleCP,
     assembleRB,
