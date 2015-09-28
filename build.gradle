@@ -190,9 +190,9 @@ task copyMethodWS(type: Copy) {
 copyMethodWS.dependsOn assembleWS
 
 task assembleAll(dependsOn: [
-	copyMethodCB,
-	copyMethodCC,
-	copyMethodCP,
+    copyMethodCB,
+    copyMethodCC,
+    copyMethodCP,
     copyMethodRB,
     copyMethodTD,
     copyMethodTG,
