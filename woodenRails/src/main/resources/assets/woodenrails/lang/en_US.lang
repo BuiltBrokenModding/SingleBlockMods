@@ -13,4 +13,5 @@ entity.wrHopperCart.name=Hopper Cart
 entity.wrPoweredCart.name=Powered Cart
 entity.wrChestCart.name=Storage Cart
 entity.wrWorkbenchCart.name=Workbench Cart
+entity.wrTankCart.name=Tank Cart
 tile.woodenrails:woodenRail.name=Wooden Rail

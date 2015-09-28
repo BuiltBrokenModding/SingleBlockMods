@@ -128,7 +128,7 @@ public class ItemWoodenCart extends Item
                     return this.workbenchMinecraft;
                 case TNT:
                     return this.tntMinecraft;
-                case BC_TANK:
+                case TANK:
                     return this.bcTankMinecraft;
             }
         }
@@ -220,6 +220,8 @@ public class ItemWoodenCart extends Item
                     return new EntityHopperCart(world);
                 case WORKTABLE:
                     return new EntityWorkbenchCart(world);
+                case TANK:
+                    return new EntityTankCart(world);
             }
         }
         return new EntityEmptyCart(world);
