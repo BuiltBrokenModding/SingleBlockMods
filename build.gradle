@@ -112,16 +112,93 @@ task copyMethodCC(type: Copy) {
 
 copyMethodCC.dependsOn assembleCC
 
+task copyMethodCP(type: Copy) {
+    from 'coloredPots/output'
+    into 'output'
+    include '*.jar'
+    exclude { details -> details.file.name.endsWith('.html') &&
+                         details.file.text.contains('staging') }
+    mustRunAfter "assembleCB"
+}
+
+copyMethodCP.dependsOn assembleCP
+
+task copyMethodRB(type: Copy) {
+    from 'redbull/output'
+    into 'output'
+    include '*.jar'
+    exclude { details -> details.file.name.endsWith('.html') &&
+                         details.file.text.contains('staging') }
+    mustRunAfter "assembleCB"
+}
+
+copyMethodRB.dependsOn assembleRB
+
+task copyMethodTD(type: Copy) {
+    from 'teleportDoor/output'
+    into 'output'
+    include '*.jar'
+    exclude { details -> details.file.name.endsWith('.html') &&
+                         details.file.text.contains('staging') }
+    mustRunAfter "assembleCB"
+}
+
+copyMethodTD.dependsOn assembleTD
+
+task copyMethodTG(type: Copy) {
+    from 'threadedGrass/output'
+    into 'output'
+    include '*.jar'
+    exclude { details -> details.file.name.endsWith('.html') &&
+                         details.file.text.contains('staging') }
+    mustRunAfter "assembleCB"
+}
+
+copyMethodTG.dependsOn assembleTG
+
+task copyMethodWB(type: Copy) {
+    from 'woodenBucket/output'
+    into 'output'
+    include '*.jar'
+    exclude { details -> details.file.name.endsWith('.html') &&
+                         details.file.text.contains('staging') }
+    mustRunAfter "assembleCB"
+}
+
+copyMethodWB.dependsOn assembleWB
+
+task copyMethodWR(type: Copy) {
+    from 'woodenRails/output'
+    into 'output'
+    include '*.jar'
+    exclude { details -> details.file.name.endsWith('.html') &&
+                         details.file.text.contains('staging') }
+    mustRunAfter "assembleCB"
+}
+
+copyMethodWR.dependsOn assembleWR
+
+task copyMethodWS(type: Copy) {
+    from 'woodenShears/output'
+    into 'output'
+    include '*.jar'
+    exclude { details -> details.file.name.endsWith('.html') &&
+                         details.file.text.contains('staging') }
+    mustRunAfter "assembleCB"
+}
+
+copyMethodWS.dependsOn assembleWS
+
 task assembleAll(dependsOn: [
 	copyMethodCB,
-	assembleCC,
-	assembleCP,
-    assembleRB,
-    assembleTD,
-    assembleTG,
-    assembleWB,
-    assembleWR,
-    assembleWS]
+	copyMethodCC,
+	copyMethodCP,
+    copyMethodRB,
+    copyMethodTD,
+    copyMethodTG,
+    copyMethodWB,
+    copyMethodWR,
+    copyMethodWS]
 ) {
 }
 	
