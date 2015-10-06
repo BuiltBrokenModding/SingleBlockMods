@@ -86,6 +86,10 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
             list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.name") + ": " + getFluid(stack).getLocalizedName());
             list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.amount.name") + ": " + getFluid(stack).amount + "mb");
         }
+        else if (player.capabilities.isCreativeMode)
+        {
+            list.add("\u00a7c" + StatCollector.translateToLocal(getUnlocalizedName() + ".creative.void"));
+        }
     }
 
     @SubscribeEvent
