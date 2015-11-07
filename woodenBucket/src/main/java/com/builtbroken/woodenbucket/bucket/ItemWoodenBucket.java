@@ -772,7 +772,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     {
         if (isEmpty(itemstack))
             return null;
-        return new ItemStack(this, itemstack.getItemDamage());
+        return new ItemStack(WoodenBucket.itemBucket, 1, itemstack.getItemDamage());
     }
 
     @Override
