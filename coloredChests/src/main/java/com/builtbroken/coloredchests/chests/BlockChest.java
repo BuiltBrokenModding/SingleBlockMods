@@ -54,8 +54,7 @@ public class BlockChest extends BlockContainer
         this.setBlockName(ColoredChests.PREFIX + "coloredChest");
         this.setCreativeTab(CreativeTabs.tabDecorations);
         this.setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.875F, 0.9375F);
-        this.setHardness(Blocks.chest.blockHardness);
-        this.setResistance(Blocks.chest.blockResistance);
+        this.setHardness(2.5F);
     }
 
     @Override

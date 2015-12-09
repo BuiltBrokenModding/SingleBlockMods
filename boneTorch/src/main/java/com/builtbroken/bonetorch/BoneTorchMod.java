@@ -36,7 +36,7 @@ public class BoneTorchMod
     @Mod.EventHandler
     public void postInit(FMLPostInitializationEvent event)
     {
-        GameRegistry.addRecipe(new ShapedOreRecipe(blockTorch, "c", "s", 'c', Items.coal, 's', Items.bone));
-        GameRegistry.addRecipe(new ShapedOreRecipe(blockTorch, "c", "s", 'c', new ItemStack(Items.coal, 1, 1), 's', Items.bone));
+        GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockTorch, 4, 0), "c", "s", 'c', Items.coal, 's', Items.bone));
+        GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(blockTorch, 4, 0), "c", "s", 'c', new ItemStack(Items.coal, 1, 1), 's', Items.bone));
     }
 }

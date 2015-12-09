@@ -43,10 +43,10 @@ buildProps.withReader {
 
 if (project.getProperty("bambooshortPlanName") == "BBM-Dev") {
     group = "dev.builtbroken.colorpots"
-    archivesBaseName = "coloredPots"
+    archivesBaseName = "boneTorch"
 } else {
     group = "com.builtbroken.colorpots"
-    archivesBaseName = "coloredPots"
+    archivesBaseName = "boneTorch"
 }
 
 println archivesBaseName 
@@ -90,7 +90,7 @@ processResources {
 	}
 }
 
-archivesBaseName = "coloredPots"
+archivesBaseName = "boneTorch"
 
 repositories {
     maven {
@@ -127,4 +127,4 @@ jacocoTestReport {
     }
 }
 
-file("Colored-Pots.txt").text = version;
+file("Bone-Torch.txt").text = version;

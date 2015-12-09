@@ -10,3 +10,6 @@
 [submodule "redbull/BuiltBrokenScripts"]
 	path = redbull/BuiltBrokenScripts
 	url = https://github.com/BuiltBrokenModding/BuiltBrokenScripts.git
+[submodule "boneTorch/BuiltBrokenScripts"]
+	path = boneTorch/BuiltBrokenScripts
+	url = https://github.com/BuiltBrokenModding/BuiltBrokenScripts.git
