@@ -19,6 +19,32 @@ processResources {
 	}
 }
 
+archivesBaseName = "ColoredChests"
+
+repositories {
+    maven {
+        name "BuiltBroken"
+        url "http://ci.builtbroken.com/maven/"
+    }
+}
+
+jar {
+    manifest.mainAttributes(
+            "Built-By": System.getProperty('user.name'),
+            "Created-By": currentJvm,
+            "Implementation-Title": archivesBaseName,
+            "Implementation-Version": project.version,
+    )
+}
+
+dependencies 
+{
+    testCompile 'junit:junit:4.11'
+    compile "com.builtbroken.codinglib:CodingLib:0.0.3b27:deobf"
+    testCompile "com.builtbroken.minecraftjunit:MinecraftJUnit:1.7.10-0.+:deobf"
+    compile "dev.builtbroken.voltzengine:VoltzEngine:1.7.10-0.+:deobf-dev"
+}
+
 def getDate() {
     def date = new Date()
     def formattedDate = date.format('yyyyMMddHHmmss')

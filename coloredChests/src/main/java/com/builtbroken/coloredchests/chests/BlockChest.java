@@ -54,6 +54,7 @@ public class BlockChest extends BlockContainer
         this.setBlockName(ColoredChests.PREFIX + "coloredChest");
         this.setCreativeTab(CreativeTabs.tabDecorations);
         this.setBlockBounds(0.0625F, 0.0F, 0.0625F, 0.9375F, 0.875F, 0.9375F);
+        this.setHardness(2.5F);
     }
 
     @Override
@@ -95,7 +96,9 @@ public class BlockChest extends BlockContainer
         Color color = null;
         TileEntity tile = world.getTileEntity(x, y, z);
         if (tile instanceof TileChest)
+        {
             color = ((TileChest) tile).color;
+        }
         boolean block = isMatchingChest(world, x, y, z - 1, color);
         boolean block1 = isMatchingChest(world, x, y, z + 1, color);
         boolean block2 = isMatchingChest(world, x - 1, y, z, color);
@@ -377,7 +380,9 @@ public class BlockChest extends BlockContainer
     {
         Color stackColor = null;
         if (stack.getTagCompound() != null && stack.getTagCompound().hasKey("rgb"))
+        {
             stackColor = ColoredChests.getColor(stack.getTagCompound().getInteger("rgb"));
+        }
 
         for (int b = 2; b < ForgeDirection.VALID_DIRECTIONS.length; b++)
         {

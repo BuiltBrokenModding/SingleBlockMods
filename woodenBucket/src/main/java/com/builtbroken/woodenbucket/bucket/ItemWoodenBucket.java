@@ -33,15 +33,22 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
- * Created by Dark on 7/25/2015.
+ * Improved version of the vanilla bucket that can accept any fluid type. This
+ * version uses a wooden texture for the bucket body.
+ *
+ * @author Dark
+ * @version 7/25/2015.
  */
 public class ItemWoodenBucket extends Item implements IFluidContainerItem
 {
     @SideOnly(Side.CLIENT)
-    public static IIcon fluidTexture;
+    public static IIcon fluidTextureWater;
 
     @SideOnly(Side.CLIENT)
-    public static IIcon lavaTexture;
+    public static IIcon fluidTextureWhite;
+
+    @SideOnly(Side.CLIENT)
+    public static IIcon fluidTextureLava;
 
     @SideOnly(Side.CLIENT)
     public static IIcon blankTexture;
@@ -85,6 +92,10 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         {
             list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.name") + ": " + getFluid(stack).getLocalizedName());
             list.add(StatCollector.translateToLocal(getUnlocalizedName() + ".fluid.amount.name") + ": " + getFluid(stack).amount + "mb");
+        }
+        else if (player.capabilities.isCreativeMode)
+        {
+            list.add("\u00a7c" + StatCollector.translateToLocal(getUnlocalizedName() + ".creative.void"));
         }
     }
 
@@ -531,6 +542,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     @Override
     public void registerIcons(IIconRegister reg)
     {
+        //Bucket textures
         itemIcon = reg.registerIcon(WoodenBucket.PREFIX + "bucket.oak");
         acaciaTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.acacia");
         birchTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.birch");
@@ -538,14 +550,23 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         spruceTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.spruce");
         charredTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.charred");
         bigOakTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.big_oak");
-        fluidTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.fluid");
-        lavaTexture = reg.registerIcon(WoodenBucket.PREFIX + "bucket.lava");
+
+        //Fluid overlay defaults
+        fluidTextureWater = reg.registerIcon(WoodenBucket.PREFIX + "bucket.fluid");
+        fluidTextureWhite = reg.registerIcon(WoodenBucket.PREFIX + "bucket.fluid2");
+        fluidTextureLava = reg.registerIcon(WoodenBucket.PREFIX + "bucket.lava");
+        //Fluid overlay blank
         blankTexture = reg.registerIcon(WoodenBucket.PREFIX + "blank");
 
+        //Supported fluids
         for (String string : supportedFluidTextures)
         {
             fluidToIconMap.put(string, reg.registerIcon(WoodenBucket.PREFIX + "bucket." + string));
         }
+
+        //Register defaults
+        fluidToIconMap.put("water", fluidTextureWater);
+        fluidToIconMap.put("lava", fluidTextureLava);
     }
 
     @SideOnly(Side.CLIENT)
@@ -555,13 +576,29 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
         if (pass == 1)
         {
             if (isEmpty(stack))
+            {
                 return blankTexture;
-            else if (fluidToIconMap.containsKey(getFluid(stack).getFluid().getName()))
-                return fluidToIconMap.get(getFluid(stack).getFluid().getName());
-            else if (getFluid(stack).getFluid() == FluidRegistry.LAVA || getFluid(stack).getFluid().getTemperature() > 600)
-                return lavaTexture;
+            }
             else
-                return fluidTexture;
+            {
+                Fluid fluid = getFluid(stack).getFluid();
+                if (fluidToIconMap.containsKey(fluid.getName()))
+                {
+                    return fluidToIconMap.get(getFluid(stack).getFluid().getName());
+                }
+                else if (fluid.getColor() != 0xFFFFFF)
+                {
+                    return fluidTextureWhite;
+                }
+                else if (getFluid(stack).getFluid().getTemperature() > 600)
+                {
+                    return fluidTextureLava;
+                }
+                else
+                {
+                    return fluidTextureWater;
+                }
+            }
         }
         return super.getIcon(stack, pass);
     }
@@ -735,7 +772,7 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     {
         if (isEmpty(itemstack))
             return null;
-        return new ItemStack(this, itemstack.getItemDamage());
+        return new ItemStack(WoodenBucket.itemBucket, 1, itemstack.getItemDamage());
     }
 
     @Override

@@ -1,0 +1,16 @@
+Audio beeps when msgs are received
+
+Version 1
+    Normal beep when any chat message shows up
+    
+Version 2
+    Color recognision for different beep types (Admin vs normal)
+    
+Version 3
+    Parsing of chat to look for your username, other peoples usernames, and ranks
+    Configs to change beep types for each parse types
+    
+Version 4 
+    GUI to change configs
+    More control over beeps
+    Custom beeps
