@@ -245,27 +245,27 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
 
     }
 
-    protected ItemStack consumeBucket(ItemStack itemstack, EntityPlayer player, ItemStack item)
+    protected ItemStack consumeBucket(ItemStack currentStack, EntityPlayer player, ItemStack newStack)
     {
         //Creative mode we don't care about items
         if (player.capabilities.isCreativeMode)
         {
-            return itemstack;
+            return currentStack;
         }
         //If we only have one bucket consume and replace slot with new bucket
-        else if (--itemstack.stackSize <= 0)
+        else if (--currentStack.stackSize <= 0)
         {
-            return item;
+            return newStack;
         }
         //If we have more than one bucket try to add the new one to the player's inventory
         else
         {
-            if (!player.inventory.addItemStackToInventory(item))
+            if (!player.inventory.addItemStackToInventory(newStack))
             {
-                player.dropPlayerItemWithRandomChoice(item, false);
+                player.dropPlayerItemWithRandomChoice(newStack, false);
             }
 
-            return itemstack;
+            return currentStack;
         }
     }
 
@@ -723,14 +723,16 @@ public class ItemWoodenBucket extends Item implements IFluidContainerItem
     {
         if (entity instanceof EntityCow && isEmpty(stack))
         {
-            if (!player.worldObj.isRemote)
+            if (player.worldObj.isRemote)
                 return true;
+
             Fluid fluid = FluidRegistry.getFluid("milk");
             if (fluid != null)
             {
                 ItemStack newBucket = new ItemStack(this, 1, stack.getItemDamage());
                 fill(newBucket, new FluidStack(fluid, FluidContainerRegistry.BUCKET_VOLUME), true);
-                player.inventory.setInventorySlotContents(player.inventory.currentItem, consumeBucket(stack, player, newBucket));
+                stack.stackSize--;
+                player.inventory.addItemStackToInventory(newBucket);
                 player.inventoryContainer.detectAndSendChanges();
             }
             else
