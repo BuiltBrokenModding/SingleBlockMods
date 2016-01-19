@@ -1,27 +1,20 @@
-apply plugin: 'java'
-apply from: 'https://raw.githubusercontent.com/BuiltBrokenModding/BuiltBrokenScripts/buildScripts/index-sbm.gradle'
-
-processResources {
-	from(sourceSets.main.resources.srcDirs) {
-		//include '**/*.lang'
-		include '**/*.info'
-		include '**/*.properties'
-
-		expand 'version': project.version, 'mcversion': project.minecraft.version
-		// replace version and MCVersion
-	}
-
-	// copy everything else, thats not text
-	from(sourceSets.main.resources.srcDirs) {
-		exclude '**/*.info'
-		exclude '**/*.properties'
-	}
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            name = "forge"
+            url = "http://files.minecraftforge.net/maven"
+        }
+        maven {
+            name = "sonatype"
+            url = "https://oss.sonatype.org/content/repositories/snapshots/"
+        }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:1.2-SNAPSHOT'
+        classpath 'org.ajoberstar:gradle-git:0.10.1'
+    }
 }
 
-def getDate() {
-    def date = new Date()
-    def formattedDate = date.format('yyyyMMddHHmmss')
-    return formattedDate
-}
+apply from: 'https://raw.githubusercontent.com/BuiltBrokenModding/BuiltBrokenScripts/buildScripts/index/index-sbm.gradle'
 
-file("WoodenShears.txt").text = version;

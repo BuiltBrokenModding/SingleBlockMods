@@ -37,3 +37,12 @@ woodenBucket/WoodenBuckets.txt
 teleportDoor/telepotDoor.txt
 coloredPots/Colored-Pots.txt
 woodenShears/WoodenShears.txt
+SBM-$(archivebase).txt
+boneTorch/BoneTorch.txt
+cardboardBoxes/CardBoardBoxes.txt
+coloredChests/ColoredChests.txt
+coloredChests/debug.log
+coloredPots/ColoredPots.txt
+redbull/RedCow.txt
+teleportDoor/TeleportDoor.txt
+woodenRails/WoodenRails.txt
