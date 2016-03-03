@@ -1,0 +1,7 @@
+Allow crops to be right click to be harvest and automaticly replanted
+
+Should support
+Wheat
+Potatos
+carrots
+
