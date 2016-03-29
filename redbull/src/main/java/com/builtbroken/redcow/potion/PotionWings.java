@@ -40,8 +40,10 @@ public class PotionWings extends Potion
                     ((EntityPlayerMP) entity).playerNetServerHandler.sendPacket(new S39PacketPlayerAbilities(((EntityPlayerMP) entity).capabilities));
                 }
             }
-            else
+            //Shouldn't happen but in case the player is in creative mode do not remove flying
+            else if(!((EntityPlayerMP) entity).capabilities.isCreativeMode)
             {
+
                 ((EntityPlayer) entity).capabilities.allowFlying = false;
                 ((EntityPlayer) entity).capabilities.isFlying = false;
                 ((EntityPlayer) entity).fallDistance = 0.0F;
