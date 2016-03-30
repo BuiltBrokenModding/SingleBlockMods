@@ -1,1 +1,0 @@
-3D model dolly that can move any block around easily. Will render the dolly in front of the player when held. The dolly will also attempt to render the block it is moving giving it a nicer visual design.

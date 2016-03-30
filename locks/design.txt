@@ -1,1 +1,0 @@
-Block event system in combination with a renderer that will allow a lock to be placed onto any block. The event system will prevent the block from being opened. The renderer will then show the lock on the front of the block.

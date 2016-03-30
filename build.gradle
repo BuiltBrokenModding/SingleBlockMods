@@ -1,7 +1,0 @@
-import org.gradle.api.artifacts.*
-subprojects.each { subproject -> evaluationDependsOn( subproject.path ) }
-
-task setupDecompWorkspaceAll(dependsOn:
-	  cardboardBoxes.collect { ':' + it + ":setupDecompWorkspace" }
-	+ coloredChests.collect { ':' + it + ":setupDecompWorkspace" }
-	+ coloredPots.collect { ':' + it + ":setupDecompWorkspace" }) {}
