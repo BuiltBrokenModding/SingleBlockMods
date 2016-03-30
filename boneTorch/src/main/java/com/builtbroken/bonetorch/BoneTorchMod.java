@@ -1,7 +1,6 @@
 package com.builtbroken.bonetorch;
 
 import com.builtbroken.bonetorch.torch.BlockBoneTorch;
-import com.builtbroken.bonetorch.torch.ItemBlockBoneTorch;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -30,7 +29,7 @@ public class BoneTorchMod
     {
         blockTorch = new BlockBoneTorch();
         //TODO add bone sound type
-        GameRegistry.registerBlock(blockTorch, ItemBlockBoneTorch.class, "BTBoneTorch");
+        GameRegistry.registerBlock(blockTorch, BlockBoneTorch.class, "BTBoneTorch");
     }
 
     @Mod.EventHandler

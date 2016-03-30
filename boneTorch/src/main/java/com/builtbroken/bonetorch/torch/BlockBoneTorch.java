@@ -13,9 +13,10 @@ public class BlockBoneTorch extends BlockTorch
     {
         super();
         this.setBlockName(BoneTorchMod.PREFIX + "boneTorch");
-        this.setBlockTextureName(BoneTorchMod.PREFIX + "boneTorch");
         this.setHardness(0.0F);
         this.setLightLevel(0.9375F);
         this.setStepSound(soundTypeWood);
     }
+
+
 }
