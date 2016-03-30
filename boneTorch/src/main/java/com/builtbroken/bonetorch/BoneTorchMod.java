@@ -30,7 +30,7 @@ public class BoneTorchMod
         blockTorch = new BlockBoneTorch();
         //TODO add bone sound type
         //GameRegistry.registerBlock(blockTorch, BlockBoneTorch.class, "BTBoneTorch");
-        GameRegistry.registerBlock(blockTorch, String.valueOf(BlockBoneTorch.class));
+        GameRegistry.registerBlock(blockTorch, "BTBoneTorch");
 
     }
 
