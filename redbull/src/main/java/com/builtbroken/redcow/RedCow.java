@@ -36,7 +36,7 @@ public class RedCow
     public static Logger LOGGER;
 
     public static Potion potionRedBull;
-    public static Item itemRedbullCan;
+    public static ItemRedbull itemRedbullCan;
 
     @Mod.EventHandler
     public void preInit(FMLPreInitializationEvent event)
@@ -47,7 +47,8 @@ public class RedCow
         config.load();
         //Create items
         itemRedbullCan = new ItemRedbull();
-        GameRegistry.registerItem(itemRedbullCan, "rbRedCowCan");
+        GameRegistry.registerItem(itemRedbullCan);
+        itemRedbullCan.initModel();
 
         proxy.preInit();
     }

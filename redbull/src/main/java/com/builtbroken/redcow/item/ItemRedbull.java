@@ -1,8 +1,14 @@
 package com.builtbroken.redcow.item;
 
 import com.builtbroken.redcow.RedCow;
+
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+
+import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
@@ -24,7 +30,14 @@ public class ItemRedbull extends Item
         this.setMaxStackSize(16);
         this.setHasSubtypes(true);
         this.setCreativeTab(CreativeTabs.tabFood);
-        this.setUnlocalizedName(RedCow.PREFIX + "can");
+        this.setUnlocalizedName(RedCow.DOMAIN + ":can");
+        this.setRegistryName("can");
+    }
+
+    @SideOnly(Side.CLIENT)
+    public void initModel() {
+        ModelLoader.setCustomModelResourceLocation(new ItemRedbull(), 0, new ModelResourceLocation(getRegistryName() + "_full", "inventory"));
+        ModelLoader.setCustomModelResourceLocation(new ItemRedbull(), 1, new ModelResourceLocation(getRegistryName() + "_empty", "inventory"));
     }
 
     @Override
