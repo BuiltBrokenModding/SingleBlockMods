@@ -1,16 +1,14 @@
 package com.builtbroken.redcow.item;
 
 import com.builtbroken.redcow.RedCow;
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.client.renderer.texture.IIconRegister;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.PotionEffect;
-import net.minecraft.util.IIcon;
 import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
 
@@ -21,9 +19,6 @@ import java.util.List;
  */
 public class ItemRedbull extends Item
 {
-    @SideOnly(Side.CLIENT)
-    IIcon empty_icon;
-
     public ItemRedbull()
     {
         this.setMaxStackSize(16);
@@ -51,9 +46,8 @@ public class ItemRedbull extends Item
     }
 
     @Override
-    public ItemStack onEaten(ItemStack item, World world, EntityPlayer player)
-    {
-        if (item.getItemDamage() != 0 && !player.capabilities.isCreativeMode)
+    public ItemStack onItemUseFinish(ItemStack stack, World world, EntityPlayer player) {
+        if (stack.getItemDamage() != 0 && !player.capabilities.isCreativeMode)
         {
             if (!world.isRemote)
             {
@@ -62,8 +56,8 @@ public class ItemRedbull extends Item
 
             if (!player.capabilities.isCreativeMode)
             {
-                --item.stackSize;
-                if (item.stackSize <= 0)
+                --stack.stackSize;
+                if (stack.stackSize <= 0)
                 {
                     return new ItemStack(this);
                 }
@@ -71,7 +65,7 @@ public class ItemRedbull extends Item
                 player.inventory.addItemStackToInventory(new ItemStack(this));
             }
         }
-        return item;
+        return stack;
     }
 
     @Override
@@ -87,8 +81,8 @@ public class ItemRedbull extends Item
     public EnumAction getItemUseAction(ItemStack stack)
     {
         if (stack.getItemDamage() == 0)
-            return EnumAction.none;
-        return EnumAction.drink;
+            return EnumAction.NONE;
+        return EnumAction.DRINK;
     }
 
     @Override
@@ -105,22 +99,5 @@ public class ItemRedbull extends Item
     {
         list.add(new ItemStack(item, 1, 0));
         list.add(new ItemStack(item, 1, 1));
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public void registerIcons(IIconRegister reg)
-    {
-        this.itemIcon = reg.registerIcon(RedCow.PREFIX + "can");
-        this.empty_icon = reg.registerIcon(RedCow.PREFIX + "empty");
-    }
-
-    @Override
-    @SideOnly(Side.CLIENT)
-    public IIcon getIconFromDamage(int meta)
-    {
-        if (meta == 0)
-            return empty_icon;
-        return itemIcon;
     }
 }

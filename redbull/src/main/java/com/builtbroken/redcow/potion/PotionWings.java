@@ -7,6 +7,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S39PacketPlayerAbilities;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
+import net.minecraft.util.ResourceLocation;
 
 import java.awt.*;
 
@@ -15,9 +16,9 @@ import java.awt.*;
  */
 public class PotionWings extends Potion
 {
-    public PotionWings(int id)
+    public PotionWings(ResourceLocation loc)
     {
-        super(id, false, new Color(1f, 1f, 1f, 0F).getRGB());
+        super(loc, false, new Color(1f, 1f, 1f, 0F).getRGB());
         setPotionName(RedCow.PREFIX + "wings");
     }
 

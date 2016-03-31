@@ -2,16 +2,18 @@ package com.builtbroken.redcow;
 
 import com.builtbroken.redcow.item.ItemRedbull;
 import com.builtbroken.redcow.potion.PotionWings;
-import cpw.mods.fml.common.Mod;
-import cpw.mods.fml.common.SidedProxy;
-import cpw.mods.fml.common.event.FMLInitializationEvent;
-import cpw.mods.fml.common.event.FMLPostInitializationEvent;
-import cpw.mods.fml.common.event.FMLPreInitializationEvent;
-import cpw.mods.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
+import net.minecraft.util.ResourceLocation;
+
 import net.minecraftforge.common.config.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,7 +69,7 @@ public class RedCow
                 break;
             freeID++;
         }
-        potionRedBull = new PotionWings(config.getInt("PotionID", Configuration.CATEGORY_GENERAL, freeID, 23, Potion.potionTypes.length, "Potion ID used by the potion effect"));
+        potionRedBull = new PotionWings(new ResourceLocation("wings"));
 
         GameRegistry.addShapelessRecipe(new ItemStack(itemRedbullCan, 1, 1), new ItemStack(itemRedbullCan, 1, 0), Items.slime_ball, Items.apple, Items.blaze_powder, Items.carrot);
         GameRegistry.addShapedRecipe(new ItemStack(itemRedbullCan, 16, 0), "g", "i", "g", 'i', Items.iron_ingot, 'g', new ItemStack(Items.dye, 1, 8));
