@@ -23,7 +23,7 @@ import java.util.Map;
  * Created by Dark on 8/3/2015.
  * Updated by Kolatra on 3/30/2016.
  */
-public class LayerRedWings implements LayerRenderer<AbstractClientPlayer>
+public class LayerRedWings
 {
     public static ResourceLocation wingTexture = new ResourceLocation(RedCow.DOMAIN, "textures/models/wings.png");
 
@@ -107,15 +107,5 @@ public class LayerRedWings implements LayerRenderer<AbstractClientPlayer>
 
             GL11.glPopMatrix();
         }
-    }
-
-    @Override
-    public void doRenderLayer(AbstractClientPlayer entitylivingbaseIn, float p_177141_2_, float p_177141_3_, float partialTicks, float p_177141_5_, float p_177141_6_, float p_177141_7_, float scale) {
-
-    }
-
-    @Override
-    public boolean shouldCombineTextures() {
-        return false;
     }
 }
