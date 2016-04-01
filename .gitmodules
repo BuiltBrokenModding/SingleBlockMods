@@ -7,6 +7,3 @@
 [submodule "coloredChests/BuiltBrokenScripts"]
 	path = coloredChests/BuiltBrokenScripts
 	url = https://github.com/BuiltBrokenModding/BuiltBrokenScripts.git
-[submodule "boneTorch/BuiltBrokenScripts"]
-	path = boneTorch/BuiltBrokenScripts
-	url = https://github.com/BuiltBrokenModding/BuiltBrokenScripts.git
