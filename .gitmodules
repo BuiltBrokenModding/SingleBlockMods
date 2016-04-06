@@ -1,0 +1,9 @@
+[submodule "woodenBucket"]
+	path = woodenBucket
+	url = https://github.com/BuiltBrokenModding/SBM-woodenBucket
+[submodule "redCow"]
+	path = redCow
+	url = https://github.com/BuiltBrokenModding/SBM-redCow
+[submodule "coloredChests"]
+	path = coloredChests
+	url = https://github.com/BuiltBrokenModding/SBM-coloredChests
