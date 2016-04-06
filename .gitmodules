@@ -1,9 +1,0 @@
-[submodule "woodenBucket/BuiltBrokenScripts"]
-	path = woodenBucket/BuiltBrokenScripts
-	url = https://github.com/BuiltBrokenModding/BuiltBrokenScripts.git
-[submodule "woodenRails/BuiltBrokenScripts"]
-	path = woodenRails/BuiltBrokenScripts
-	url = https://github.com/BuiltBrokenModding/BuiltBrokenScripts.git
-[submodule "coloredChests/BuiltBrokenScripts"]
-	path = coloredChests/BuiltBrokenScripts
-	url = https://github.com/BuiltBrokenModding/BuiltBrokenScripts.git
