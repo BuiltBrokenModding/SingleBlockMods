@@ -1,0 +1,10 @@
+*.iml
+*/build/
+*/.gradle/
+*/output/
+*/CompiledWith.txt
+*/logs/
+coloredChests/Colored-Chests.txt
+redbull/Red-Cow.txt
+woodenBucket/AI-Improvements.txt
+woodenRails/Wooden-Rails.txt
