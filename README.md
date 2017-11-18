@@ -1,5 +1,8 @@
 # SingleBlockMods
 
+## Notice
+This repo has been broken down into small repos per project. Thus will no longer be used but has been archieved to keep commit logs.
+
 ## Why small mods
 The main goal of the project is to create quailty content which can easily be added to modpacks. This is easily done with a small scope of a few items or blocks. 
 
